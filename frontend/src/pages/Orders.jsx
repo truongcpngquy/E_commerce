@@ -1,26 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { useApp } from '../context/AppContext';
+import React, { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../hooks/useReduxHooks';
+import { fetchOrders } from '../store/slices/orderSlice';
 import { Link } from 'react-router-dom';
 import { Package, Clock, ShieldAlert } from 'lucide-react';
 import './Orders.css';
 
 export default function Orders() {
-  const { fetchOrders, token } = useApp();
-  const [orders, setOrders] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const token = useAppSelector((state) => state.auth.token);
+  const orders = useAppSelector((state) => state.order.orders);
+  const isLoading = useAppSelector((state) => state.order.loading);
 
   useEffect(() => {
-    const loadOrders = async () => {
-      if (token) {
-        setIsLoading(true);
-        const data = await fetchOrders();
-        setOrders(data);
-        setIsLoading(false);
-      }
-    };
-
-    loadOrders();
-  }, [token]);
+    if (token) {
+      dispatch(fetchOrders());
+    }
+  }, [token, dispatch]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);

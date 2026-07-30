@@ -6,7 +6,8 @@
 
 ## 🛠️ Công nghệ Sử dụng
 
-*   **Frontend**: ReactJS (Vite), React Router DOM, Lucide Icons, CSS Modules/Vanilla CSS (Premium UI).
+*   **Frontend**: ReactJS (Vite), React Router DOM, Lucide Icons.
+    *   *UI Framework*: **Không sử dụng** (Dự án được thiết kế thủ công bằng **Vanilla CSS/CSS Modules** tùy chỉnh, không dùng Tailwind CSS, Bootstrap hay Material-UI).
 *   **Backend**: Node.js, Express, MySQL2 (Promise pool), JWT, BcryptJS.
 *   **Thuật toán Gợi ý (Content-Based Filtering)**: TF-IDF (Term Frequency-Inverse Document Frequency) kết hợp Cosine Similarity.
 

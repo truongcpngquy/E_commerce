@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
+import { useAppDispatch } from '../hooks/useReduxHooks';
+import { loginUser, signupUser } from '../store/slices/authSlice';
 import './Auth.css';
 
 export default function Auth() {
@@ -11,7 +12,7 @@ export default function Auth() {
   const [role, setRole] = useState('customer');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { login, signup } = useApp();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -23,14 +24,14 @@ export default function Auth() {
 
     setIsLoading(true);
     if (isLogin) {
-      const res = await login(username, password);
-      if (res.success) {
+      const action = await dispatch(loginUser({ username, password }));
+      if (loginUser.fulfilled.match(action)) {
         navigate('/');
       }
     } else {
-      const res = await signup(username, password, email, role);
-      if (res.success) {
-        setIsLogin(true); // Chuyển sang form đăng nhập sau khi đăng ký thành công
+      const action = await dispatch(signupUser({ username, password, email, role }));
+      if (signupUser.fulfilled.match(action)) {
+        setIsLogin(true);
       }
     }
     setIsLoading(false);

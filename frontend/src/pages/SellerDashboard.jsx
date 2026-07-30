@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { useApp } from '../context/AppContext';
+import { useAppDispatch, useAppSelector } from '../hooks/useReduxHooks';
+import { createProduct } from '../store/slices/productSlice';
 import { Link } from 'react-router-dom';
 import { PlusCircle, Info, ShieldAlert } from 'lucide-react';
 import './SellerDashboard.css';
 
 export default function SellerDashboard() {
-  const { user, categories, createProduct } = useApp();
+  const user = useAppSelector((state) => state.auth.user);
+  const categories = useAppSelector((state) => state.product.categories);
+  const dispatch = useAppDispatch();
+
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
@@ -33,7 +37,7 @@ export default function SellerDashboard() {
     const finalImageUrl = imageUrl.trim() || defaultImages[categoryId] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500';
 
     setIsSubmitting(true);
-    const result = await createProduct({
+    const action = await dispatch(createProduct({
       name,
       description,
       price: Number(price),
@@ -41,10 +45,10 @@ export default function SellerDashboard() {
       image_url: finalImageUrl,
       category_id: Number(categoryId),
       tags: tags.toLowerCase(),
-    });
+    }));
     setIsSubmitting(false);
 
-    if (result.success) {
+    if (createProduct.fulfilled.match(action)) {
       // Clear form
       setName('');
       setPrice('');

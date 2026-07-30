@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
+import { useAppDispatch, useAppSelector } from '../hooks/useReduxHooks';
+import { createOrder } from '../store/slices/orderSlice';
 import './Checkout.css';
 
 export default function Checkout() {
-  const { cart, createOrder } = useApp();
+  const cart = useAppSelector((state) => state.cart.cartItems);
+  const dispatch = useAppDispatch();
   const [shippingAddress, setShippingAddress] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -17,10 +19,10 @@ export default function Checkout() {
     }
 
     setIsSubmitting(true);
-    const res = await createOrder(shippingAddress);
+    const action = await dispatch(createOrder(shippingAddress));
     setIsSubmitting(false);
 
-    if (res.success) {
+    if (createOrder.fulfilled.match(action)) {
       navigate('/orders');
     }
   };

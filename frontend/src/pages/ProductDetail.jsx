@@ -1,48 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
+import { useAppDispatch, useAppSelector } from '../hooks/useReduxHooks';
+import { fetchProductById, clearProductDetails } from '../store/slices/productSlice';
+import { fetchSimilarProducts, trackUserInteraction } from '../store/slices/recommendationSlice';
+import { addToCart } from '../store/slices/cartSlice';
+import useProductTracking from '../hooks/useProductTracking';
 import { ShoppingCart, Heart, ShieldCheck, RefreshCw, Truck } from 'lucide-react';
 import './ProductDetail.css';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { 
-    fetchProductById, 
-    addToCart, 
-    trackInteraction, 
-    getSimilarProducts 
-  } = useApp();
+  const dispatch = useAppDispatch();
 
-  const [product, setProduct] = useState(null);
-  const [similarProducts, setSimilarProducts] = useState([]);
+  const product = useAppSelector((state) => state.product.selectedProduct);
+  const similarProducts = useAppSelector((state) => state.recommendation.similarList);
+  const isLoading = useAppSelector((state) => state.product.loading);
+
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Load sản phẩm chi tiết
+  // Khởi chạy hook tự động ghi nhận tương tác 'view' (trọng số = 1)
+  useProductTracking(product?.id, 'view');
+
+  // Tải chi tiết sản phẩm và các sản phẩm tương tự
   useEffect(() => {
-    const loadProductData = async () => {
-      setIsLoading(true);
-      const data = await fetchProductById(id);
-      if (data) {
-        setProduct(data);
-        
-        // Track hành vi 'view' của người dùng (trọng số = 1)
-        trackInteraction(data.id, 'view');
-        
-        // Lấy danh sách sản phẩm tương tự (Content-Based)
-        const similar = await getSimilarProducts(data.id, 5);
-        setSimilarProducts(similar);
-      } else {
-        setProduct(null);
-      }
-      setIsLoading(false);
-      // Reset số lượng về 1 khi đổi sản phẩm
-      setQuantity(1);
-    };
+    dispatch(fetchProductById(id));
+    dispatch(fetchSimilarProducts({ productId: id, limit: 5 }));
 
-    loadProductData();
+    return () => {
+      dispatch(clearProductDetails());
+    };
+  }, [id, dispatch]);
+
+  // Reset số lượng khi chuyển sản phẩm
+  useEffect(() => {
+    setQuantity(1);
+    setIsLiked(false);
   }, [id]);
 
   const handleQuantityChange = (val) => {
@@ -52,15 +46,15 @@ export default function ProductDetail() {
     }
   };
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = () => {
     if (!product) return;
-    await addToCart(product.id, quantity);
+    dispatch(addToCart({ productId: product.id, quantity }));
   };
 
   const handleBuyNow = async () => {
     if (!product) return;
-    const success = await addToCart(product.id, quantity);
-    if (success) {
+    const action = await dispatch(addToCart({ productId: product.id, quantity }));
+    if (addToCart.fulfilled.match(action)) {
       navigate('/cart');
     }
   };
@@ -70,7 +64,7 @@ export default function ProductDetail() {
     setIsLiked(!isLiked);
     if (!isLiked) {
       // Lưu vết tương tác: Like (trọng số = 2)
-      trackInteraction(product.id, 'like');
+      dispatch(trackUserInteraction({ productId: product.id, type: 'like' }));
     }
   };
 

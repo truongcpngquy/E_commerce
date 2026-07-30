@@ -1,48 +1,49 @@
 import React, { useEffect, useState } from 'react';
-import { useApp } from '../context/AppContext';
-import { Link } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../hooks/useReduxHooks';
+import { fetchProducts } from '../store/slices/productSlice';
+import { fetchPersonalizedRecommendations } from '../store/slices/recommendationSlice';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Sparkles, Grid, ArrowRight } from 'lucide-react';
 import './Home.css';
 
 export default function Home() {
-  const { categories, fetchProducts, getPersonalizedRecommendations, user, searchQuery } = useApp();
+  const dispatch = useAppDispatch();
+  const [searchParams] = useSearchParams();
   
+  const categories = useAppSelector((state) => state.product.categories);
+  const user = useAppSelector((state) => state.auth.user);
+  const recommendedProducts = useAppSelector((state) => state.recommendation.personalizedList);
+  const isLoadingRecommendations = useAppSelector((state) => state.recommendation.loadingPersonalized);
+
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [allProducts, setAllProducts] = useState([]);
-  const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
-  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
 
-  // Lấy danh sách sản phẩm thông thường
+  const searchQuery = searchParams.get('search') || '';
+
+  // Lấy danh sách sản phẩm thông thường khi category hoặc URL search thay đổi
   useEffect(() => {
     const loadProducts = async () => {
       setIsLoadingProducts(true);
-      const data = await fetchProducts({
+      const action = await dispatch(fetchProducts({
         category: selectedCategory,
         search: searchQuery
-      });
-      setAllProducts(data);
+      }));
+      if (fetchProducts.fulfilled.match(action)) {
+        setAllProducts(action.payload || []);
+      }
       setIsLoadingProducts(false);
     };
 
     loadProducts();
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, dispatch]);
 
-  // Lấy danh sách sản phẩm gợi ý (Content-Based)
+  // Lấy danh sách gợi ý cá nhân hóa (Content-Based) khi user đăng nhập
   useEffect(() => {
-    const loadRecommendations = async () => {
-      if (user) {
-        setIsLoadingRecommendations(true);
-        const data = await getPersonalizedRecommendations(6);
-        setRecommendedProducts(data);
-        setIsLoadingRecommendations(false);
-      } else {
-        setRecommendedProducts([]);
-      }
-    };
-
-    loadRecommendations();
-  }, [user, allProducts]); // Load lại khi user đổi hoặc danh sách sản phẩm đổi
+    if (user) {
+      dispatch(fetchPersonalizedRecommendations(6));
+    }
+  }, [user, allProducts, dispatch]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -98,7 +99,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 1: GỢI Ý CÁ NHÂN HÓA (Chỉ khi User đăng nhập hoặc hiển thị gợi ý tổng quan) */}
+      {/* SECTION 1: GỢI Ý CÁ NHÂN HÓA */}
       {user && recommendedProducts.length > 0 && (
         <section className="recommendations-section">
           <div className="section-header">
