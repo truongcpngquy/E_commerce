@@ -1,92 +1,68 @@
-const db = require('../config/db');
+const productService = require('../services/productService');
 
-// Lấy danh sách sản phẩm (có hỗ trợ lọc theo danh mục, tìm kiếm và phân trang)
 exports.getAllProducts = async (req, res) => {
-  const { category, search, limit = 20, offset = 0 } = req.query;
-
   try {
-    let query = `
-      SELECT p.*, c.name as category_name 
-      FROM products p 
-      LEFT JOIN categories c ON p.category_id = c.id
-      WHERE 1=1
-    `;
-    const params = [];
-
-    if (category) {
-      query += ' AND p.category_id = ?';
-      params.push(category);
-    }
-
-    if (search) {
-      query += ' AND (p.name LIKE ? OR p.description LIKE ? OR p.tags LIKE ?)';
-      const searchParam = `%${search}%`;
-      params.push(searchParam, searchParam, searchParam);
-    }
-
-    query += ' ORDER BY p.id DESC LIMIT ? OFFSET ?';
-    params.push(Number(limit), Number(offset));
-
-    const [products] = await db.query(query, params);
+    const products = await productService.getAllProducts(req.query);
     res.json(products);
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi server!', error: err.message });
+    const status = err.statusCode || 500;
+    res.status(status).json({ message: err.message || 'Lỗi server khi lấy sản phẩm!' });
   }
 };
 
-// Lấy chi tiết sản phẩm
 exports.getProductById = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    const [products] = await db.query(
-      `SELECT p.*, c.name as category_name 
-       FROM products p 
-       LEFT JOIN categories c ON p.category_id = c.id 
-       WHERE p.id = ?`,
-      [id]
-    );
-
-    if (products.length === 0) {
-      return res.status(404).json({ message: 'Không tìm thấy sản phẩm!' });
-    }
-
-    res.json(products[0]);
+    const product = await productService.getProductById(req.params.id);
+    res.json(product);
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi server!', error: err.message });
+    const status = err.statusCode || 500;
+    res.status(status).json({ message: err.message || 'Lỗi server khi lấy sản phẩm!' });
   }
 };
 
-// Lấy tất cả categories
 exports.getCategories = async (req, res) => {
   try {
-    const [categories] = await db.query('SELECT * FROM categories');
+    const categories = await productService.getCategories();
     res.json(categories);
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi server!', error: err.message });
+    res.status(500).json({ message: 'Lỗi server khi lấy danh mục!', error: err.message });
   }
 };
 
-// Thêm mới sản phẩm (Dành cho Seller)
-exports.createProduct = async (req, res) => {
-  const { name, description, price, stock, image_url, category_id, tags } = req.body;
-
-  if (!name || !price || !category_id) {
-    return res.status(400).json({ message: 'Vui lòng nhập tên, giá và danh mục sản phẩm!' });
-  }
-
+exports.getBrands = async (req, res) => {
   try {
-    const [result] = await db.query(
-      `INSERT INTO products (name, description, price, stock, image_url, category_id, tags) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [name, description, price, stock || 0, image_url, category_id, tags]
-    );
-
-    res.status(201).json({
-      message: 'Thêm sản phẩm thành công!',
-      productId: result.insertId
-    });
+    const brands = await productService.getBrands();
+    res.json(brands);
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi server!', error: err.message });
+    res.status(500).json({ message: 'Lỗi server khi lấy thương hiệu!', error: err.message });
+  }
+};
+
+exports.searchSuggest = async (req, res) => {
+  try {
+    const suggestions = await productService.searchSuggest(req.query.q);
+    res.json(suggestions);
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi gợi ý tìm kiếm!', error: err.message });
+  }
+};
+
+exports.searchProducts = async (req, res) => {
+  try {
+    const userId = req.user ? req.user.id : null;
+    const products = await productService.searchProducts(req.query, userId);
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi tìm kiếm sản phẩm!', error: err.message });
+  }
+};
+
+exports.createProduct = async (req, res) => {
+  try {
+    const result = await productService.createProduct(req.user.id, req.body);
+    res.status(201).json(result);
+  } catch (err) {
+    const status = err.statusCode || 500;
+    res.status(status).json({ message: err.message || 'Lỗi server khi thêm sản phẩm!' });
   }
 };

@@ -3,7 +3,8 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../hooks/useReduxHooks';
 import { setSearchQuery } from '../store/slices/productSlice';
 import { logoutUser } from '../store/slices/authSlice';
-import { ShoppingCart, Search, User, LogOut, LayoutDashboard, ClipboardList } from 'lucide-react';
+import { trackUserInteraction } from '../store/slices/recommendationSlice';
+import { ShoppingCart, Search, User, LogOut, LayoutDashboard, ClipboardList, Sparkles, Tag } from 'lucide-react';
 import useDebounce from '../hooks/useDebounce';
 import productApi from '../api/productApi';
 import './Header.css';
@@ -18,7 +19,8 @@ export default function Header() {
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
-  const [suggestions, setSuggestions] = useState([]);
+  const [keywordSuggestions, setKeywordSuggestions] = useState([]);
+  const [matchedProducts, setMatchedProducts] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   
@@ -32,18 +34,21 @@ export default function Header() {
     dispatch(setSearchQuery(urlSearch));
   }, [searchParams, dispatch]);
 
-  // Gọi API lấy live suggestions khi người dùng nhập từ khóa
+  // Gọi API Smart Auto-complete Suggest (/products/search/suggest?q=...) khi gõ
   useEffect(() => {
-    if (debouncedSearch.trim().length >= 2) {
-      productApi.getProducts({ search: debouncedSearch.trim(), limit: 5 })
+    if (debouncedSearch.trim().length >= 1) {
+      productApi.searchSuggest(debouncedSearch.trim())
         .then((res) => {
-          setSuggestions(res || []);
+          setKeywordSuggestions(res.suggestions || []);
+          setMatchedProducts(res.products || []);
         })
         .catch(() => {
-          setSuggestions([]);
+          setKeywordSuggestions([]);
+          setMatchedProducts([]);
         });
     } else {
-      setSuggestions([]);
+      setKeywordSuggestions([]);
+      setMatchedProducts([]);
     }
   }, [debouncedSearch]);
 
@@ -61,14 +66,24 @@ export default function Header() {
   }, []);
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    dispatch(setSearchQuery(searchInput));
+    if (e) e.preventDefault();
+    if (!searchInput.trim()) return;
+    dispatch(setSearchQuery(searchInput.trim()));
     setShowSuggestions(false);
-    navigate(`/?search=${encodeURIComponent(searchInput)}`);
+    navigate(`/?search=${encodeURIComponent(searchInput.trim())}`);
   };
 
-  const handleSuggestionClick = (productId) => {
+  const handleKeywordClick = (keyword) => {
+    setSearchInput(keyword);
+    dispatch(setSearchQuery(keyword));
     setShowSuggestions(false);
+    navigate(`/?search=${encodeURIComponent(keyword)}`);
+  };
+
+  const handleProductSuggestionClick = (productId) => {
+    setShowSuggestions(false);
+    // Ghi vết tương tác search_click (weight = 2) cho AI Engine
+    dispatch(trackUserInteraction({ productId, type: 'search_click' }));
     navigate(`/product/${productId}`);
   };
 
@@ -82,6 +97,8 @@ export default function Header() {
     dispatch(logoutUser());
   };
 
+  const hasSuggestions = keywordSuggestions.length > 0 || matchedProducts.length > 0;
+
   return (
     <header className="shopee-header">
       <div className="header-container">
@@ -91,13 +108,13 @@ export default function Header() {
           <span className="logo-subtext">Recommendation</span>
         </Link>
 
-        {/* Search Bar & Suggestions wrapper */}
+        {/* Smart Search Bar & Auto-complete dropdown */}
         <div className="search-wrapper" ref={suggestionRef}>
           <form onSubmit={handleSearchSubmit} className="search-section">
             <input
               type="text"
               className="search-input"
-              placeholder="Tìm sản phẩm, thương hiệu và tags..."
+              placeholder="Nhập từ khóa tìm kiếm (VD: laptop, iphone, váy, bàn phím)..."
               value={searchInput}
               onChange={(e) => {
                 setSearchInput(e.target.value);
@@ -111,36 +128,65 @@ export default function Header() {
           </form>
 
           {/* Smart Live Suggestions Dropdown */}
-          {showSuggestions && suggestions.length > 0 && (
+          {showSuggestions && hasSuggestions && (
             <div className="search-suggestions-dropdown">
-              {suggestions.map((item) => (
-                <div
-                  key={item.id}
-                  className="suggestion-item"
-                  onClick={() => handleSuggestionClick(item.id)}
-                >
-                  <img src={item.image_url} alt={item.name} className="suggestion-img" />
-                  <div className="suggestion-info">
-                    <span className="suggestion-name">{item.name}</span>
-                    <span className="suggestion-price">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}
-                    </span>
+              {/* Phần 1: Đề xuất từ khóa phổ biến */}
+              {keywordSuggestions.length > 0 && (
+                <div className="suggestion-keywords-group">
+                  <div className="suggestion-group-title">
+                    <Sparkles size={14} className="icon-sparkle" />
+                    Từ khóa xu hướng từ search logs:
+                  </div>
+                  <div className="keywords-pills">
+                    {keywordSuggestions.map((kw, idx) => (
+                      <span
+                        key={idx}
+                        className="keyword-pill"
+                        onClick={() => handleKeywordClick(kw)}
+                      >
+                        <Tag size={12} />
+                        {kw}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              ))}
+              )}
+
+              {/* Phần 2: Đề xuất sản phẩm khớp trực tiếp */}
+              {matchedProducts.length > 0 && (
+                <div className="suggestion-products-group">
+                  <div className="suggestion-group-title">Sản phẩm gợi ý khớp từ khóa:</div>
+                  {matchedProducts.map((item) => (
+                    <div
+                      key={item.id}
+                      className="suggestion-item"
+                      onClick={() => handleProductSuggestionClick(item.id)}
+                    >
+                      <img src={item.image_url} alt={item.name} className="suggestion-img" />
+                      <div className="suggestion-info">
+                        <span className="suggestion-name">{item.name}</span>
+                        <div className="suggestion-meta">
+                          <span className="suggestion-cat">{item.category_name}</span>
+                          <span className="suggestion-price">
+                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
 
         {/* Action Buttons */}
         <div className="actions-section">
-          {/* Giỏ hàng */}
           <Link to="/cart" className="cart-icon-container">
             <ShoppingCart size={24} />
             {cartCount > 0 && <span className="cart-count-badge">{cartCount}</span>}
           </Link>
 
-          {/* User Account */}
           <div className="user-profile-section">
             {user ? (
               <div 

@@ -8,6 +8,28 @@
 CREATE DATABASE IF NOT EXISTS shopee_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE shopee_db;
 
+-- Clean existing tables if schema changed
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS cart_items;
+DROP TABLE IF EXISTS product_reviews;
+DROP TABLE IF EXISTS user_wishlist;
+DROP TABLE IF EXISTS user_behavior_logs;
+DROP TABLE IF EXISTS search_logs;
+DROP TABLE IF EXISTS product_metrics;
+DROP TABLE IF EXISTS product_vectors;
+DROP TABLE IF EXISTS product_attributes;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS brands;
+DROP TABLE IF EXISTS user_contexts;
+DROP TABLE IF EXISTS user_profiles;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS user_interactions;
+SET FOREIGN_KEY_CHECKS = 1;
+
+
 -- =============================================================
 -- MODULE 1: NGƯỜI DÙNG (USER PROFILING & CONTEXT)
 -- =============================================================
@@ -243,31 +265,6 @@ CREATE TABLE IF NOT EXISTS user_wishlist (
     UNIQUE KEY uq_wishlist (user_id, product_id)
 ) ENGINE=InnoDB;
 
--- 13. Bảng Product Reviews (Đánh giá & Phản hồi chủ động - Explicit Feedback)
--- Mục đích: Thu thập phản hồi có chủ ý để hiệu chỉnh mô hình gợi ý
-CREATE TABLE IF NOT EXISTS product_reviews (
-    id               INT AUTO_INCREMENT PRIMARY KEY,
-    user_id          INT NOT NULL,
-    product_id       INT NOT NULL,
-    order_id         INT,
-    rating           TINYINT NOT NULL,              -- Điểm đánh giá 1-5 sao
-    comment          TEXT,
-    -- Điểm phân tích cảm xúc từ AI (Sentiment Analysis)
-    -- Khoảng giá trị: -1.0 (rất tiêu cực) đến +1.0 (rất tích cực)
-    sentiment_score  DECIMAL(4, 3) DEFAULT 0.000,
-    -- Hình ảnh thực tế đính kèm (JSON array of URLs)
-    images           JSON,
-    likes_count      INT DEFAULT 0,                 -- Số lượt "Hữu ích" từ user khác
-    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL,
-    -- Mỗi user chỉ đánh giá 1 lần cho mỗi sản phẩm (có thể chỉnh sửa)
-    UNIQUE KEY uq_review (user_id, product_id),
-    INDEX idx_review_product (product_id),
-    INDEX idx_review_rating (rating)
-) ENGINE=InnoDB;
-
 -- =============================================================
 -- MODULE 5: THƯƠNG MẠI (COMMERCE CORE)
 -- =============================================================
@@ -313,3 +310,29 @@ CREATE TABLE IF NOT EXISTS order_items (
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL,
     INDEX idx_order_items_order (order_id)
 ) ENGINE=InnoDB;
+
+-- 13. Bảng Product Reviews (Đánh giá & Phản hồi chủ động - Explicit Feedback)
+-- Mục đích: Thu thập phản hồi có chủ ý để hiệu chỉnh mô hình gợi ý
+CREATE TABLE IF NOT EXISTS product_reviews (
+    id               INT AUTO_INCREMENT PRIMARY KEY,
+    user_id          INT NOT NULL,
+    product_id       INT NOT NULL,
+    order_id         INT,
+    rating           TINYINT NOT NULL,              -- Điểm đánh giá 1-5 sao
+    comment          TEXT,
+    -- Điểm phân tích cảm xúc từ AI (Sentiment Analysis)
+    -- Khoảng giá trị: -1.0 (rất tiêu cực) đến +1.0 (rất tích cực)
+    sentiment_score  DECIMAL(4, 3) DEFAULT 0.000,
+    -- Hình ảnh thực tế đính kèm (JSON array of URLs)
+    images           JSON,
+    likes_count      INT DEFAULT 0,                 -- Số lượt "Hữu ích" từ user khác
+    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL,
+    -- Mỗi user chỉ đánh giá 1 lần cho mỗi sản phẩm (có thể chỉnh sửa)
+    UNIQUE KEY uq_review (user_id, product_id),
+    INDEX idx_review_product (product_id),
+    INDEX idx_review_rating (rating)
+) ENGINE=InnoDB;
+

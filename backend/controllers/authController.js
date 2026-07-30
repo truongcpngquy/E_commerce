@@ -1,100 +1,52 @@
-const db = require('../config/db');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const authService = require('../services/authService');
 
 exports.signup = async (req, res) => {
-  const { username, password, email, role } = req.body;
-
-  if (!username || !password || !email) {
-    return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin!' });
-  }
-
   try {
-    // Kiểm tra user đã tồn tại chưa
-    const [existing] = await db.query(
-      'SELECT id FROM users WHERE username = ? OR email = ?',
-      [username, email]
-    );
-
-    if (existing.length > 0) {
-      return res.status(400).json({ message: 'Username hoặc Email đã được sử dụng!' });
-    }
-
-    // Mã hóa mật khẩu
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
-
-    // Xác định role (mặc định customer, chỉ cho phép customer hoặc seller)
-    const userRole = role === 'seller' ? 'seller' : 'customer';
-
-    // Thêm user mới
-    const [result] = await db.query(
-      'INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)',
-      [username, passwordHash, email, userRole]
-    );
-
+    const result = await authService.signupUser(req.body);
     res.status(201).json({
+      success: true,
       message: 'Đăng ký tài khoản thành công!',
-      userId: result.insertId
+      ...result
     });
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi server!', error: err.message });
+    const status = err.statusCode || 500;
+    res.status(status).json({ message: err.message || 'Lỗi server khi đăng ký!' });
   }
 };
 
 exports.login = async (req, res) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Vui lòng nhập đầy đủ username và mật khẩu!' });
-  }
-
   try {
-    // Tìm user
-    const [users] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
-    if (users.length === 0) {
-      return res.status(400).json({ message: 'Tài khoản không tồn tại!' });
-    }
-
-    const user = users[0];
-
-    // Kiểm tra mật khẩu
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Mật khẩu không chính xác!' });
-    }
-
-    // Tạo JWT Token
-    const token = jwt.sign(
-      { id: user.id, username: user.username, role: user.role },
-      process.env.JWT_SECRET || 'shopee_clone_secret_key_12345',
-      { expiresIn: '7d' }
-    );
-
+    const result = await authService.loginUser(req.body);
     res.json({
+      success: true,
       message: 'Đăng nhập thành công!',
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role
-      }
+      ...result
     });
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi server!', error: err.message });
+    const status = err.statusCode || 500;
+    res.status(status).json({ message: err.message || 'Lỗi server khi đăng nhập!' });
   }
 };
 
 exports.getMe = async (req, res) => {
   try {
-    const [users] = await db.query('SELECT id, username, email, role, created_at FROM users WHERE id = ?', [req.user.id]);
-    if (users.length === 0) {
-      return res.status(404).json({ message: 'Không tìm thấy người dùng!' });
-    }
-    res.json(users[0]);
+    const user = await authService.getUserById(req.user.id);
+    res.json(user);
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi server!', error: err.message });
+    const status = err.statusCode || 500;
+    res.status(status).json({ message: err.message || 'Lỗi server!' });
   }
+};
+
+exports.refreshToken = async (req, res) => {
+  try {
+    const token = authService.refreshToken(req.user);
+    res.json({ success: true, token });
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi làm mới token!', error: err.message });
+  }
+};
+
+exports.logout = async (req, res) => {
+  res.json({ success: true, message: 'Đăng xuất thành công!' });
 };

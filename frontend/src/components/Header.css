@@ -260,3 +260,67 @@
   color: var(--primary-color);
   font-weight: 600;
 }
+
+.suggestion-keywords-group {
+  padding: 10px 12px;
+  background: #fafafa;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.suggestion-group-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #777;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.keywords-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.keyword-pill {
+  background: var(--white);
+  color: var(--primary-color);
+  border: 1px solid #ffccb8;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: var(--transition);
+}
+
+.keyword-pill:hover {
+  background: var(--primary-color);
+  color: var(--white);
+}
+
+.suggestion-products-group {
+  padding-top: 5px;
+}
+
+.suggestion-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.suggestion-cat {
+  font-size: 11px;
+  color: #888;
+  background: #f0f0f0;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+

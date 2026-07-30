@@ -67,7 +67,13 @@ async function runSeed() {
     const schemaPath = path.join(__dirname, 'schema.sql');
     console.log(`📜 Applying schema from [${schemaPath}]...`);
     const schemaSql = fs.readFileSync(schemaPath, 'utf8');
-    await connection.query(schemaSql);
+    const statements = schemaSql.split(';');
+    for (const stmt of statements) {
+      const cleanStmt = stmt.split('\n').filter(line => !line.trim().startsWith('--')).join('\n').trim();
+      if (cleanStmt.length > 0) {
+        await connection.query(cleanStmt);
+      }
+    }
     console.log('✅ Schema applied.\n');
 
     // ── Xóa dữ liệu cũ (reset toàn bộ) ────────────────────────────────────

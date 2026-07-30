@@ -3,7 +3,6 @@ const router = express.Router();
 const cartController = require('../controllers/cartController');
 const authMiddleware = require('../middleware/auth');
 
-// Yêu cầu xác thực cho tất cả các hành động với giỏ hàng
 router.use(authMiddleware);
 
 router.get('/', cartController.getCart);
