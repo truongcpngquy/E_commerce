@@ -1,23 +1,25 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
+import { useAppDispatch, useAppSelector } from '../hooks/useReduxHooks';
+import { updateCartItem, removeFromCart } from '../store/slices/cartSlice';
 import { Trash2, ShoppingBag } from 'lucide-react';
 import './Cart.css';
 
 export default function Cart() {
-  const { cart, updateCartQuantity, removeFromCart } = useApp();
+  const cart = useAppSelector((state) => state.cart.cartItems);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const handleQuantityChange = async (productId, currentQty, stock, change) => {
     const newQty = currentQty + change;
     if (newQty >= 1 && newQty <= stock) {
-      await updateCartQuantity(productId, newQty);
+      await dispatch(updateCartItem({ productId, quantity: newQty }));
     }
   };
 
   const handleDeleteItem = async (productId) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')) {
-      await removeFromCart(productId);
+      await dispatch(removeFromCart(productId));
     }
   };
 
