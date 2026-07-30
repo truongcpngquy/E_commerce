@@ -14,23 +14,23 @@ require('dotenv').config();
 
 // ─── Trọng số hành vi người dùng (đồng bộ với DB ENUM) ──────────────────────
 const BEHAVIOR_WEIGHTS = {
-  search_click:    2,
-  product_view:    1,
+  search_click: 2,
+  product_view: 1,
   dwell_time_high: 2,
-  wishlist_add:    3,
-  cart_add:        4,
-  cart_remove:    -2,
-  checkout_start:  4,
-  purchase:        5,
-  feed_view:       1,
-  share:           3,
+  wishlist_add: 3,
+  cart_add: 4,
+  cart_remove: -2,
+  checkout_start: 4,
+  purchase: 5,
+  feed_view: 1,
+  share: 3,
 };
 
 // ─── Helper: Tính price tier (1-5) từ giá sản phẩm ─────────────────────────
 function calcPriceTier(price) {
-  if (price < 100000)   return 1; // Rất rẻ < 100K
-  if (price < 500000)   return 2; // Bình dân 100K-500K
-  if (price < 2000000)  return 3; // Trung cấp 500K-2M
+  if (price < 100000) return 1; // Rất rẻ < 100K
+  if (price < 500000) return 2; // Bình dân 100K-500K
+  if (price < 2000000) return 3; // Trung cấp 500K-2M
   if (price < 10000000) return 4; // Cao cấp 2M-10M
   return 5;                        // Siêu cao cấp > 10M
 }
@@ -50,9 +50,9 @@ async function runSeed() {
   console.log('\n🚀 [Smart E-Commerce Seeder v2.0] Starting Database Seed...\n');
 
   const connection = await mysql.createConnection({
-    host:               process.env.DB_HOST     || 'localhost',
-    user:               process.env.DB_USER     || 'root',
-    password:           process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : '',
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : '',
     multipleStatements: true,
   });
 
@@ -100,22 +100,22 @@ async function runSeed() {
     const pw = bcrypt.hashSync('123456', salt);
 
     const usersData = [
-      ['admin',     pw, 'admin@smartshop.vn',      'admin'],
-      ['seller1',   pw, 'seller1@smartshop.vn',    'seller'],
-      ['seller2',   pw, 'seller2@smartshop.vn',    'seller'],
-      ['customer1', pw, 'customer1@gmail.com',      'customer'],
-      ['customer2', pw, 'customer2@gmail.com',      'customer'],
-      ['customer3', pw, 'customer3@gmail.com',      'customer'],
-      ['customer4', pw, 'customer4@gmail.com',      'customer'],
+      ['admin', pw, 'admin@smartshop.vn', 'admin'],
+      ['seller1', pw, 'seller1@smartshop.vn', 'seller'],
+      ['seller2', pw, 'seller2@smartshop.vn', 'seller'],
+      ['customer1', pw, 'customer1@gmail.com', 'customer'],
+      ['customer2', pw, 'customer2@gmail.com', 'customer'],
+      ['customer3', pw, 'customer3@gmail.com', 'customer'],
+      ['customer4', pw, 'customer4@gmail.com', 'customer'],
     ];
     await connection.query('INSERT INTO users (username, password, email, role) VALUES ?', [usersData]);
 
-    const [[{ id: seller1Id }]]  = await connection.query('SELECT id FROM users WHERE username = "seller1"');
-    const [[{ id: seller2Id }]]  = await connection.query('SELECT id FROM users WHERE username = "seller2"');
-    const [[{ id: cust1Id }]]    = await connection.query('SELECT id FROM users WHERE username = "customer1"');
-    const [[{ id: cust2Id }]]    = await connection.query('SELECT id FROM users WHERE username = "customer2"');
-    const [[{ id: cust3Id }]]    = await connection.query('SELECT id FROM users WHERE username = "customer3"');
-    const [[{ id: cust4Id }]]    = await connection.query('SELECT id FROM users WHERE username = "customer4"');
+    const [[{ id: seller1Id }]] = await connection.query('SELECT id FROM users WHERE username = "seller1"');
+    const [[{ id: seller2Id }]] = await connection.query('SELECT id FROM users WHERE username = "seller2"');
+    const [[{ id: cust1Id }]] = await connection.query('SELECT id FROM users WHERE username = "customer1"');
+    const [[{ id: cust2Id }]] = await connection.query('SELECT id FROM users WHERE username = "customer2"');
+    const [[{ id: cust3Id }]] = await connection.query('SELECT id FROM users WHERE username = "customer3"');
+    const [[{ id: cust4Id }]] = await connection.query('SELECT id FROM users WHERE username = "customer4"');
     console.log(`  ✅ ${usersData.length} users inserted.`);
 
     // ════════════════════════════════════════════════════════════════════════
@@ -123,10 +123,10 @@ async function runSeed() {
     // ════════════════════════════════════════════════════════════════════════
     console.log('🪪 Seeding User Profiles...');
     const profilesData = [
-      [cust1Id, 'Nguyễn Văn An',    'male',   '1995-03-15', '0901234567', 'Hà Nội',     'Đống Đa',   JSON.stringify([1, 2]), 'mid-range'],
-      [cust2Id, 'Trần Thị Bích',    'female', '1998-07-22', '0912345678', 'TP.HCM',     'Quận 1',    JSON.stringify([3, 4]), 'budget'],
-      [cust3Id, 'Lê Minh Cường',    'male',   '1992-11-30', '0923456789', 'Đà Nẵng',    'Hải Châu',  JSON.stringify([1, 5]), 'premium'],
-      [cust4Id, 'Phạm Thanh Duyên', 'female', '2000-01-10', '0934567890', 'Hà Nội',     'Cầu Giấy',  JSON.stringify([4, 3]), 'budget'],
+      [cust1Id, 'Nguyễn Văn An', 'male', '1995-03-15', '0901234567', 'Hà Nội', 'Đống Đa', JSON.stringify([1, 2]), 'mid-range'],
+      [cust2Id, 'Trần Thị Bích', 'female', '1998-07-22', '0912345678', 'TP.HCM', 'Quận 1', JSON.stringify([3, 4]), 'budget'],
+      [cust3Id, 'Lê Minh Cường', 'male', '1992-11-30', '0923456789', 'Đà Nẵng', 'Hải Châu', JSON.stringify([1, 5]), 'premium'],
+      [cust4Id, 'Phạm Thanh Duyên', 'female', '2000-01-10', '0934567890', 'Hà Nội', 'Cầu Giấy', JSON.stringify([4, 3]), 'budget'],
     ];
     await connection.query(
       'INSERT INTO user_profiles (user_id,full_name,gender,date_of_birth,phone,city,district,preferred_categories,price_sensitivity) VALUES ?',
@@ -139,19 +139,19 @@ async function runSeed() {
     // ════════════════════════════════════════════════════════════════════════
     console.log('🏷️  Seeding Brands...');
     const brandsData = [
-      ['Apple',    'apple',    'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/200px-Apple_logo_black.svg.png', 'Hãng công nghệ hàng đầu thế giới', 'USA'],
-      ['Samsung',  'samsung',  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Samsung_Logo.svg/200px-Samsung_Logo.svg.png',        'Tập đoàn điện tử đa quốc gia Hàn Quốc', 'South Korea'],
-      ['Asus',     'asus',     'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/ASUS_Logo.svg/200px-ASUS_Logo.svg.png',              'Nhà sản xuất máy tính hàng đầu Đài Loan', 'Taiwan'],
-      ['Dell',     'dell',     'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Dell_Logo.png/200px-Dell_Logo.png',                  'Thương hiệu máy tính nổi tiếng Mỹ', 'USA'],
-      ['Logitech', 'logitech', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Logitech_logo.svg/200px-Logitech_logo.svg.png',      'Hãng phụ kiện máy tính hàng đầu', 'Switzerland'],
-      ['JBL',      'jbl',      'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/JBL_logo.svg/200px-JBL_logo.svg.png',               'Thương hiệu âm thanh chất lượng cao', 'USA'],
-      ['Sony',     'sony',     'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Sony_logo.svg/200px-Sony_logo.svg.png',             'Tập đoàn điện tử đa ngành Nhật Bản', 'Japan'],
-      ['Nike',     'nike',     'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/200px-Logo_NIKE.svg.png',             'Thương hiệu thể thao hàng đầu thế giới', 'USA'],
-      ['Adidas',   'adidas',   'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Adidas_Logo.svg/200px-Adidas_Logo.svg.png',         'Thương hiệu thể thao Đức nổi tiếng', 'Germany'],
-      ['Xiaomi',   'xiaomi',   'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Xiaomi_logo.svg/200px-Xiaomi_logo.svg.png',         'Hãng công nghệ Trung Quốc', 'China'],
-      ['Philips',  'philips',  'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Philips_logo_new.svg/200px-Philips_logo_new.svg.png','Tập đoàn điện tử gia dụng Hà Lan', 'Netherlands'],
-      ['AKKO',     'akko',     'https://cdn.shopify.com/s/files/1/0512/2312/6707/files/akkogamer_logo.png',                                   'Thương hiệu bàn phím cơ cao cấp', 'China'],
-      ['Unbranded','unbranded','',                                                                                                             'Hàng không nhãn hiệu', 'Vietnam'],
+      ['Apple', 'apple', 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/200px-Apple_logo_black.svg.png', 'Hãng công nghệ hàng đầu thế giới', 'USA'],
+      ['Samsung', 'samsung', 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Samsung_Logo.svg/200px-Samsung_Logo.svg.png', 'Tập đoàn điện tử đa quốc gia Hàn Quốc', 'South Korea'],
+      ['Asus', 'asus', 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/ASUS_Logo.svg/200px-ASUS_Logo.svg.png', 'Nhà sản xuất máy tính hàng đầu Đài Loan', 'Taiwan'],
+      ['Dell', 'dell', 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Dell_Logo.png/200px-Dell_Logo.png', 'Thương hiệu máy tính nổi tiếng Mỹ', 'USA'],
+      ['Logitech', 'logitech', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Logitech_logo.svg/200px-Logitech_logo.svg.png', 'Hãng phụ kiện máy tính hàng đầu', 'Switzerland'],
+      ['JBL', 'jbl', 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/JBL_logo.svg/200px-JBL_logo.svg.png', 'Thương hiệu âm thanh chất lượng cao', 'USA'],
+      ['Sony', 'sony', 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Sony_logo.svg/200px-Sony_logo.svg.png', 'Tập đoàn điện tử đa ngành Nhật Bản', 'Japan'],
+      ['Nike', 'nike', 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/200px-Logo_NIKE.svg.png', 'Thương hiệu thể thao hàng đầu thế giới', 'USA'],
+      ['Adidas', 'adidas', 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Adidas_Logo.svg/200px-Adidas_Logo.svg.png', 'Thương hiệu thể thao Đức nổi tiếng', 'Germany'],
+      ['Xiaomi', 'xiaomi', 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Xiaomi_logo.svg/200px-Xiaomi_logo.svg.png', 'Hãng công nghệ Trung Quốc', 'China'],
+      ['Philips', 'philips', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Philips_logo_new.svg/200px-Philips_logo_new.svg.png', 'Tập đoàn điện tử gia dụng Hà Lan', 'Netherlands'],
+      ['AKKO', 'akko', 'https://cdn.shopify.com/s/files/1/0512/2312/6707/files/akkogamer_logo.png', 'Thương hiệu bàn phím cơ cao cấp', 'China'],
+      ['Unbranded', 'unbranded', '', 'Hàng không nhãn hiệu', 'Vietnam'],
     ];
     await connection.query('INSERT INTO brands (name, slug, logo_url, description, country) VALUES ?', [brandsData]);
 
@@ -166,36 +166,36 @@ async function runSeed() {
 
     // Level 1 - Danh mục gốc
     const rootCats = [
-      [null, 'Điện tử & Công nghệ',  'dien-tu-cong-nghe',  'https://images.unsplash.com/photo-1518770660439-4636190af475?w=300', 1],
-      [null, 'Thời trang & Phụ kiện','thoi-trang-phu-kien', 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300', 1],
-      [null, 'Gia dụng & Nhà cửa',   'gia-dung-nha-cua',   'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300', 1],
-      [null, 'Thể thao & Du lịch',   'the-thao-du-lich',   'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=300', 1],
-      [null, 'Sức khỏe & Làm đẹp',   'suc-khoe-lam-dep',   'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300', 1],
+      [null, 'Điện tử & Công nghệ', 'dien-tu-cong-nghe', 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=300', 1],
+      [null, 'Thời trang & Phụ kiện', 'thoi-trang-phu-kien', 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300', 1],
+      [null, 'Gia dụng & Nhà cửa', 'gia-dung-nha-cua', 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300', 1],
+      [null, 'Thể thao & Du lịch', 'the-thao-du-lich', 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=300', 1],
+      [null, 'Sức khỏe & Làm đẹp', 'suc-khoe-lam-dep', 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300', 1],
     ];
     await connection.query('INSERT INTO categories (parent_id, name, slug, image_url, level) VALUES ?', [rootCats]);
 
     const [dbRootCats] = await connection.query("SELECT id, slug FROM categories WHERE level = 1");
-    const rootCatMap   = Object.fromEntries(dbRootCats.map(c => [c.slug, c.id]));
+    const rootCatMap = Object.fromEntries(dbRootCats.map(c => [c.slug, c.id]));
 
     // Level 2 - Danh mục con
     const subCats = [
       // Điện tử & Công nghệ
-      [rootCatMap['dien-tu-cong-nghe'], 'Laptop & Máy tính',      'laptop-may-tinh',     'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=200', 2],
-      [rootCatMap['dien-tu-cong-nghe'], 'Điện thoại thông minh',  'dien-thoai',          'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200', 2],
-      [rootCatMap['dien-tu-cong-nghe'], 'Phụ kiện máy tính',      'phu-kien-may-tinh',   'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=200', 2],
-      [rootCatMap['dien-tu-cong-nghe'], 'Âm thanh & Tai nghe',    'am-thanh-tai-nghe',   'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200', 2],
-      [rootCatMap['dien-tu-cong-nghe'], 'Đồng hồ thông minh',     'dong-ho-thong-minh',  'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200', 2],
+      [rootCatMap['dien-tu-cong-nghe'], 'Laptop & Máy tính', 'laptop-may-tinh', 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=200', 2],
+      [rootCatMap['dien-tu-cong-nghe'], 'Điện thoại thông minh', 'dien-thoai', 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200', 2],
+      [rootCatMap['dien-tu-cong-nghe'], 'Phụ kiện máy tính', 'phu-kien-may-tinh', 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=200', 2],
+      [rootCatMap['dien-tu-cong-nghe'], 'Âm thanh & Tai nghe', 'am-thanh-tai-nghe', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200', 2],
+      [rootCatMap['dien-tu-cong-nghe'], 'Đồng hồ thông minh', 'dong-ho-thong-minh', 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200', 2],
       // Thời trang & Phụ kiện
-      [rootCatMap['thoi-trang-phu-kien'], 'Thời trang Nam',       'thoi-trang-nam',      'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=200', 2],
-      [rootCatMap['thoi-trang-phu-kien'], 'Thời trang Nữ',        'thoi-trang-nu',       'https://images.unsplash.com/photo-1554568218-0f1715e72254?w=200', 2],
-      [rootCatMap['thoi-trang-phu-kien'], 'Giày dép Nam',         'giay-dep-nam',        'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200', 2],
-      [rootCatMap['thoi-trang-phu-kien'], 'Giày dép Nữ',          'giay-dep-nu',         'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=200', 2],
+      [rootCatMap['thoi-trang-phu-kien'], 'Thời trang Nam', 'thoi-trang-nam', 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=200', 2],
+      [rootCatMap['thoi-trang-phu-kien'], 'Thời trang Nữ', 'thoi-trang-nu', 'https://images.unsplash.com/photo-1554568218-0f1715e72254?w=200', 2],
+      [rootCatMap['thoi-trang-phu-kien'], 'Giày dép Nam', 'giay-dep-nam', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200', 2],
+      [rootCatMap['thoi-trang-phu-kien'], 'Giày dép Nữ', 'giay-dep-nu', 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=200', 2],
       // Gia dụng & Nhà cửa
-      [rootCatMap['gia-dung-nha-cua'],  'Thiết bị nhà bếp',       'thiet-bi-nha-bep',    'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200', 2],
-      [rootCatMap['gia-dung-nha-cua'],  'Thiết bị làm sạch',      'thiet-bi-lam-sach',   'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200', 2],
+      [rootCatMap['gia-dung-nha-cua'], 'Thiết bị nhà bếp', 'thiet-bi-nha-bep', 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200', 2],
+      [rootCatMap['gia-dung-nha-cua'], 'Thiết bị làm sạch', 'thiet-bi-lam-sach', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200', 2],
       // Thể thao & Du lịch
-      [rootCatMap['the-thao-du-lich'],  'Quần áo thể thao',        'quan-ao-the-thao',   'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200', 2],
-      [rootCatMap['the-thao-du-lich'],  'Giày thể thao',            'giay-the-thao',     'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200', 2],
+      [rootCatMap['the-thao-du-lich'], 'Quần áo thể thao', 'quan-ao-the-thao', 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200', 2],
+      [rootCatMap['the-thao-du-lich'], 'Giày thể thao', 'giay-the-thao', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200', 2],
     ];
     await connection.query('INSERT INTO categories (parent_id, name, slug, image_url, level) VALUES ?', [subCats]);
 
@@ -437,8 +437,70 @@ async function runSeed() {
     }
 
     const [dbProducts] = await connection.query('SELECT id, name, category_id, price FROM products');
-    const productMap  = Object.fromEntries(dbProducts.map(p => [p.name, p]));
+    const productMap = Object.fromEntries(dbProducts.map(p => [p.name, p]));
     console.log(`  ✅ ${productsData.length} products inserted.`);
+
+    // ════════════════════════════════════════════════════════════════════════
+    // SEED 5.5: NORMALIZED TAGS & PRODUCT_TAGS (Bảng 3NF Phân Loại Theo Tag Types)
+    // ════════════════════════════════════════════════════════════════════════
+    console.log('🏷️  Seeding Normalized Categorized Tags & Product-Tag Junction Table...');
+
+    const slugify = (text) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+    const TAG_TYPE_MAP = {
+      'thời trang': 'style', 'thời trang nam': 'style', 'thời trang nữ': 'style', 'vẻ đẹp': 'style',
+      'xinh xắn': 'style', 'hàn quốc': 'style', 'sang trọng': 'style', 'lịch lãm': 'style',
+      'tiểu thư': 'style', 'dễ thương': 'style', 'năng động': 'style', 'trẻ trung': 'style', 'thanh lịch': 'style',
+      'gaming': 'tech', 'ultra slim': 'tech', 'mỏng nhẹ': 'tech', 'chống ồn': 'tech', 'anc': 'tech',
+      'pin trâu': 'tech', 'sạc nhanh': 'tech', 'snapdragon': 'tech', 'apple': 'tech', 'rtx 4060': 'tech', '144hz': 'tech',
+      'đi làm': 'usage', 'văn phòng': 'usage', 'chơi game': 'usage', 'du lịch': 'usage', 'dạo phố': 'usage', 'chạy bộ': 'usage', 'gym': 'usage',
+      'chính hãng': 'segment', 'cao cấp': 'segment', 'flagship': 'segment', 'trend 2024': 'segment'
+    };
+
+    const tagCountMap = {};
+    const productTagPairs = [];
+
+    for (const prod of productsData) {
+      const prodName = prod[4];
+      const tagsStr = prod[11];
+      const pObj = productMap[prodName];
+      if (pObj && tagsStr) {
+        const tagList = tagsStr.split(',').map(t => t.trim()).filter(Boolean);
+        tagList.forEach(tagName => {
+          tagCountMap[tagName] = (tagCountMap[tagName] || 0) + 1;
+          productTagPairs.push([pObj.id, tagName]);
+        });
+      }
+    }
+
+    const priorityTrending = ['thời trang', 'vẻ đẹp', 'xinh xắn', 'hàn quốc', 'sang trọng', 'gaming', 'apple', 'laptop'];
+
+    const tagIdMap = {};
+    for (const [tagName, usageCount] of Object.entries(tagCountMap)) {
+      const tagSlug = slugify(tagName);
+      const isTrending = priorityTrending.includes(tagName.toLowerCase()) ? 1 : 0;
+      const tagType = TAG_TYPE_MAP[tagName.toLowerCase()] || 'general';
+
+      await connection.query(
+        `INSERT INTO tags (name, slug, type, usage_count, is_trending)
+         VALUES (?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE usage_count = VALUES(usage_count), type = VALUES(type)`,
+        [tagName, tagSlug, tagType, usageCount, isTrending]
+      );
+      const [insertedTag] = await connection.query('SELECT id FROM tags WHERE slug = ?', [tagSlug]);
+      if (insertedTag && insertedTag.length > 0) {
+        tagIdMap[tagName] = insertedTag[0].id;
+      }
+    }
+
+    const ptValues = productTagPairs
+      .map(([pid, tagName]) => [pid, tagIdMap[tagName]])
+      .filter(([pid, tid]) => pid && tid);
+
+    if (ptValues.length > 0) {
+      await connection.query('INSERT IGNORE INTO product_tags (product_id, tag_id) VALUES ?', [ptValues]);
+    }
+    console.log(`  ✅ ${Object.keys(tagIdMap).length} tags (categorized by type) and ${ptValues.length} product-tag relations inserted.`);
 
     // ════════════════════════════════════════════════════════════════════════
     // SEED 6: PRODUCT ATTRIBUTES (EAV - thuộc tính chi tiết)
@@ -449,79 +511,79 @@ async function runSeed() {
 
     const attributesData = [
       // Laptop ASUS TUF Gaming
-      [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'cpu',          'AMD Ryzen 7 7745HX'],
-      [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'ram',          '16GB DDR5'],
-      [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'vga',          'NVIDIA RTX 4060 8GB'],
-      [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'storage',      '512GB NVMe SSD'],
-      [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'screen_size',  '15.6 inch'],
+      [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'cpu', 'AMD Ryzen 7 7745HX'],
+      [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'ram', '16GB DDR5'],
+      [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'vga', 'NVIDIA RTX 4060 8GB'],
+      [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'storage', '512GB NVMe SSD'],
+      [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'screen_size', '15.6 inch'],
       [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'refresh_rate', '144Hz'],
-      [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'color',        'Xám Bão'],
+      [getProductId('Laptop ASUS TUF Gaming A15 2024'), 'color', 'Xám Bão'],
 
       // Laptop Dell XPS 13
-      [getProductId('Laptop Dell XPS 13 9315 Ultra Slim'), 'cpu',         'Intel Core i5-1230U'],
-      [getProductId('Laptop Dell XPS 13 9315 Ultra Slim'), 'ram',         '8GB LPDDR5'],
-      [getProductId('Laptop Dell XPS 13 9315 Ultra Slim'), 'storage',     '512GB SSD'],
+      [getProductId('Laptop Dell XPS 13 9315 Ultra Slim'), 'cpu', 'Intel Core i5-1230U'],
+      [getProductId('Laptop Dell XPS 13 9315 Ultra Slim'), 'ram', '8GB LPDDR5'],
+      [getProductId('Laptop Dell XPS 13 9315 Ultra Slim'), 'storage', '512GB SSD'],
       [getProductId('Laptop Dell XPS 13 9315 Ultra Slim'), 'screen_size', '13.4 inch'],
-      [getProductId('Laptop Dell XPS 13 9315 Ultra Slim'), 'weight',      '1.17 kg'],
-      [getProductId('Laptop Dell XPS 13 9315 Ultra Slim'), 'color',       'Bạch Kim'],
+      [getProductId('Laptop Dell XPS 13 9315 Ultra Slim'), 'weight', '1.17 kg'],
+      [getProductId('Laptop Dell XPS 13 9315 Ultra Slim'), 'color', 'Bạch Kim'],
 
       // MacBook Air M2
-      [getProductId('MacBook Air M2 2023 - 8GB/256GB'), 'cpu',         'Apple M2'],
-      [getProductId('MacBook Air M2 2023 - 8GB/256GB'), 'ram',         '8GB Unified Memory'],
-      [getProductId('MacBook Air M2 2023 - 8GB/256GB'), 'storage',     '256GB SSD'],
+      [getProductId('MacBook Air M2 2023 - 8GB/256GB'), 'cpu', 'Apple M2'],
+      [getProductId('MacBook Air M2 2023 - 8GB/256GB'), 'ram', '8GB Unified Memory'],
+      [getProductId('MacBook Air M2 2023 - 8GB/256GB'), 'storage', '256GB SSD'],
       [getProductId('MacBook Air M2 2023 - 8GB/256GB'), 'screen_size', '13.6 inch'],
-      [getProductId('MacBook Air M2 2023 - 8GB/256GB'), 'weight',      '1.24 kg'],
-      [getProductId('MacBook Air M2 2023 - 8GB/256GB'), 'color',       'Midnight'],
+      [getProductId('MacBook Air M2 2023 - 8GB/256GB'), 'weight', '1.24 kg'],
+      [getProductId('MacBook Air M2 2023 - 8GB/256GB'), 'color', 'Midnight'],
 
       // iPhone 15 Pro
-      [getProductId('iPhone 15 Pro 256GB Titan Đen'), 'chip',         'A17 Pro Bionic'],
-      [getProductId('iPhone 15 Pro 256GB Titan Đen'), 'storage',      '256GB'],
-      [getProductId('iPhone 15 Pro 256GB Titan Đen'), 'screen_size',  '6.1 inch'],
-      [getProductId('iPhone 15 Pro 256GB Titan Đen'), 'camera',       '48MP + 12MP + 12MP'],
-      [getProductId('iPhone 15 Pro 256GB Titan Đen'), 'color',        'Black Titanium'],
+      [getProductId('iPhone 15 Pro 256GB Titan Đen'), 'chip', 'A17 Pro Bionic'],
+      [getProductId('iPhone 15 Pro 256GB Titan Đen'), 'storage', '256GB'],
+      [getProductId('iPhone 15 Pro 256GB Titan Đen'), 'screen_size', '6.1 inch'],
+      [getProductId('iPhone 15 Pro 256GB Titan Đen'), 'camera', '48MP + 12MP + 12MP'],
+      [getProductId('iPhone 15 Pro 256GB Titan Đen'), 'color', 'Black Titanium'],
       [getProductId('iPhone 15 Pro 256GB Titan Đen'), 'refresh_rate', '120Hz ProMotion'],
 
       // Samsung Galaxy S24 Ultra
-      [getProductId('Samsung Galaxy S24 Ultra 256GB'), 'chip',         'Snapdragon 8 Gen 3'],
-      [getProductId('Samsung Galaxy S24 Ultra 256GB'), 'storage',      '256GB'],
-      [getProductId('Samsung Galaxy S24 Ultra 256GB'), 'ram',          '12GB'],
-      [getProductId('Samsung Galaxy S24 Ultra 256GB'), 'camera',       '200MP + 12MP + 10MP + 10MP'],
-      [getProductId('Samsung Galaxy S24 Ultra 256GB'), 'screen_size',  '6.8 inch'],
-      [getProductId('Samsung Galaxy S24 Ultra 256GB'), 'battery',      '5000mAh'],
+      [getProductId('Samsung Galaxy S24 Ultra 256GB'), 'chip', 'Snapdragon 8 Gen 3'],
+      [getProductId('Samsung Galaxy S24 Ultra 256GB'), 'storage', '256GB'],
+      [getProductId('Samsung Galaxy S24 Ultra 256GB'), 'ram', '12GB'],
+      [getProductId('Samsung Galaxy S24 Ultra 256GB'), 'camera', '200MP + 12MP + 10MP + 10MP'],
+      [getProductId('Samsung Galaxy S24 Ultra 256GB'), 'screen_size', '6.8 inch'],
+      [getProductId('Samsung Galaxy S24 Ultra 256GB'), 'battery', '5000mAh'],
 
       // Tai nghe Sony WH-1000XM5
       [getProductId('Tai nghe chống ồn Sony WH-1000XM5'), 'connectivity', 'Bluetooth 5.2'],
       [getProductId('Tai nghe chống ồn Sony WH-1000XM5'), 'battery_life', '30 giờ'],
-      [getProductId('Tai nghe chống ồn Sony WH-1000XM5'), 'feature',      'ANC chủ động'],
-      [getProductId('Tai nghe chống ồn Sony WH-1000XM5'), 'driver',       '30mm'],
-      [getProductId('Tai nghe chống ồn Sony WH-1000XM5'), 'color',        'Đen'],
+      [getProductId('Tai nghe chống ồn Sony WH-1000XM5'), 'feature', 'ANC chủ động'],
+      [getProductId('Tai nghe chống ồn Sony WH-1000XM5'), 'driver', '30mm'],
+      [getProductId('Tai nghe chống ồn Sony WH-1000XM5'), 'color', 'Đen'],
 
       // Giày Nike Air Max 270
-      [getProductId('Giày Nike Air Max 270 Nam Đen Size 42'), 'size',       '42'],
-      [getProductId('Giày Nike Air Max 270 Nam Đen Size 42'), 'color',      'Đen/Trắng'],
-      [getProductId('Giày Nike Air Max 270 Nam Đen Size 42'), 'material',   'Mesh thoáng khí'],
-      [getProductId('Giày Nike Air Max 270 Nam Đen Size 42'), 'sole',       'Air Max đệm khí'],
-      [getProductId('Giày Nike Air Max 270 Nam Đen Size 42'), 'gender',     'Nam'],
+      [getProductId('Giày Nike Air Max 270 Nam Đen Size 42'), 'size', '42'],
+      [getProductId('Giày Nike Air Max 270 Nam Đen Size 42'), 'color', 'Đen/Trắng'],
+      [getProductId('Giày Nike Air Max 270 Nam Đen Size 42'), 'material', 'Mesh thoáng khí'],
+      [getProductId('Giày Nike Air Max 270 Nam Đen Size 42'), 'sole', 'Air Max đệm khí'],
+      [getProductId('Giày Nike Air Max 270 Nam Đen Size 42'), 'gender', 'Nam'],
 
       // Áo Polo Nam
-      [getProductId('Áo Polo Nam Cotton Premium Cá Sấu'), 'material',  'Cotton Pique 220gsm'],
-      [getProductId('Áo Polo Nam Cotton Premium Cá Sấu'), 'size',      'S, M, L, XL, XXL'],
-      [getProductId('Áo Polo Nam Cotton Premium Cá Sấu'), 'color',     'Nhiều màu'],
-      [getProductId('Áo Polo Nam Cotton Premium Cá Sấu'), 'gender',    'Nam'],
-      [getProductId('Áo Polo Nam Cotton Premium Cá Sấu'), 'style',     'Cổ bẻ'],
+      [getProductId('Áo Polo Nam Cotton Premium Cá Sấu'), 'material', 'Cotton Pique 220gsm'],
+      [getProductId('Áo Polo Nam Cotton Premium Cá Sấu'), 'size', 'S, M, L, XL, XXL'],
+      [getProductId('Áo Polo Nam Cotton Premium Cá Sấu'), 'color', 'Nhiều màu'],
+      [getProductId('Áo Polo Nam Cotton Premium Cá Sấu'), 'gender', 'Nam'],
+      [getProductId('Áo Polo Nam Cotton Premium Cá Sấu'), 'style', 'Cổ bẻ'],
 
       // Váy đầm hoa nhí
       [getProductId('Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư'), 'material', 'Voan Tơ 2 lớp'],
-      [getProductId('Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư'), 'size',     'S, M, L, XL'],
-      [getProductId('Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư'), 'pattern',  'Hoa nhí'],
-      [getProductId('Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư'), 'style',    'Dáng xòe'],
-      [getProductId('Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư'), 'gender',   'Nữ'],
+      [getProductId('Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư'), 'size', 'S, M, L, XL'],
+      [getProductId('Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư'), 'pattern', 'Hoa nhí'],
+      [getProductId('Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư'), 'style', 'Dáng xòe'],
+      [getProductId('Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư'), 'gender', 'Nữ'],
 
       // Nồi chiên không dầu Philips
-      [getProductId('Nồi Chiên Không Dầu Philips HD9270/90 XL 6.2L'), 'capacity',   '6.2 Lít'],
-      [getProductId('Nồi Chiên Không Dầu Philips HD9270/90 XL 6.2L'), 'power',      '2000W'],
+      [getProductId('Nồi Chiên Không Dầu Philips HD9270/90 XL 6.2L'), 'capacity', '6.2 Lít'],
+      [getProductId('Nồi Chiên Không Dầu Philips HD9270/90 XL 6.2L'), 'power', '2000W'],
       [getProductId('Nồi Chiên Không Dầu Philips HD9270/90 XL 6.2L'), 'technology', 'Rapid Air'],
-      [getProductId('Nồi Chiên Không Dầu Philips HD9270/90 XL 6.2L'), 'color',      'Đen'],
+      [getProductId('Nồi Chiên Không Dầu Philips HD9270/90 XL 6.2L'), 'color', 'Đen'],
     ].filter(a => a[0] != null);
 
     if (attributesData.length > 0) {
@@ -560,20 +622,20 @@ async function runSeed() {
     // ════════════════════════════════════════════════════════════════════════
     console.log('🔍 Seeding Search Logs...');
     const searchQueries = [
-      { userId: cust1Id, query: 'laptop gaming ryzen rtx',       clickedName: 'Laptop ASUS TUF Gaming A15 2024',      resultsCount: 3 },
+      { userId: cust1Id, query: 'laptop gaming ryzen rtx', clickedName: 'Laptop ASUS TUF Gaming A15 2024', resultsCount: 3 },
       { userId: cust1Id, query: 'bàn phím cơ không dây bluetooth', clickedName: 'Bàn phím cơ AKKO 3098B Ocean Blue CS Switch', resultsCount: 5 },
-      { userId: cust1Id, query: 'macbook m2',                    clickedName: 'MacBook Air M2 2023 - 8GB/256GB',      resultsCount: 2 },
-      { userId: cust1Id, query: 'chuột gaming logitech',         clickedName: 'Chuột gaming không dây Logitech G304 LightSpeed Trắng', resultsCount: 4 },
-      { userId: cust2Id, query: 'váy đầm hoa nhí',               clickedName: 'Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư', resultsCount: 6 },
-      { userId: cust2Id, query: 'áo thun nữ oversize',           clickedName: 'Áo Thun Nữ Tay Lỡ Form Rộng Oversize', resultsCount: 8 },
-      { userId: cust2Id, query: 'chân váy tennis cạp cao',       clickedName: 'Chân Váy Xếp Ly Tennis Cạp Cao Năng Động', resultsCount: 4 },
-      { userId: cust3Id, query: 'iphone 15 pro',                 clickedName: 'iPhone 15 Pro 256GB Titan Đen',         resultsCount: 3 },
-      { userId: cust3Id, query: 'tai nghe chống ồn sony',        clickedName: 'Tai nghe chống ồn Sony WH-1000XM5',    resultsCount: 5 },
-      { userId: cust3Id, query: 'robot hút bụi xiaomi',          clickedName: 'Robot Hút Bụi Lau Nhà Thông Minh Xiaomi Vacuum Mop Pro S', resultsCount: 3 },
-      { userId: cust4Id, query: 'giày adidas chạy bộ',           clickedName: 'Giày Adidas Ultraboost 22 Nam Trắng Size 41', resultsCount: 4 },
-      { userId: cust4Id, query: 'nồi chiên không dầu philips',   clickedName: 'Nồi Chiên Không Dầu Philips HD9270/90 XL 6.2L', resultsCount: 3 },
-      { userId: null,    query: 'samsung galaxy s24',            clickedName: 'Samsung Galaxy S24 Ultra 256GB',        resultsCount: 2 },
-      { userId: null,    query: 'áo polo nam cotton',            clickedName: 'Áo Polo Nam Cotton Premium Cá Sấu',    resultsCount: 7 },
+      { userId: cust1Id, query: 'macbook m2', clickedName: 'MacBook Air M2 2023 - 8GB/256GB', resultsCount: 2 },
+      { userId: cust1Id, query: 'chuột gaming logitech', clickedName: 'Chuột gaming không dây Logitech G304 LightSpeed Trắng', resultsCount: 4 },
+      { userId: cust2Id, query: 'váy đầm hoa nhí', clickedName: 'Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư', resultsCount: 6 },
+      { userId: cust2Id, query: 'áo thun nữ oversize', clickedName: 'Áo Thun Nữ Tay Lỡ Form Rộng Oversize', resultsCount: 8 },
+      { userId: cust2Id, query: 'chân váy tennis cạp cao', clickedName: 'Chân Váy Xếp Ly Tennis Cạp Cao Năng Động', resultsCount: 4 },
+      { userId: cust3Id, query: 'iphone 15 pro', clickedName: 'iPhone 15 Pro 256GB Titan Đen', resultsCount: 3 },
+      { userId: cust3Id, query: 'tai nghe chống ồn sony', clickedName: 'Tai nghe chống ồn Sony WH-1000XM5', resultsCount: 5 },
+      { userId: cust3Id, query: 'robot hút bụi xiaomi', clickedName: 'Robot Hút Bụi Lau Nhà Thông Minh Xiaomi Vacuum Mop Pro S', resultsCount: 3 },
+      { userId: cust4Id, query: 'giày adidas chạy bộ', clickedName: 'Giày Adidas Ultraboost 22 Nam Trắng Size 41', resultsCount: 4 },
+      { userId: cust4Id, query: 'nồi chiên không dầu philips', clickedName: 'Nồi Chiên Không Dầu Philips HD9270/90 XL 6.2L', resultsCount: 3 },
+      { userId: null, query: 'samsung galaxy s24', clickedName: 'Samsung Galaxy S24 Ultra 256GB', resultsCount: 2 },
+      { userId: null, query: 'áo polo nam cotton', clickedName: 'Áo Polo Nam Cotton Premium Cá Sấu', resultsCount: 7 },
     ];
 
     for (const sl of searchQueries) {
@@ -581,9 +643,9 @@ async function runSeed() {
       await connection.query(
         `INSERT INTO search_logs (user_id, session_id, query_text, normalized_query, results_count, clicked_product_id)
          VALUES (?, ?, ?, ?, ?, ?)`,
-        [sl.userId, `sess_${Date.now()}_${Math.random().toString(36).substr(2,6)}`,
-         sl.query, normalizeQuery(sl.query), sl.resultsCount,
-         clickedProduct?.id ?? null]
+        [sl.userId, `sess_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        sl.query, normalizeQuery(sl.query), sl.resultsCount,
+        clickedProduct?.id ?? null]
       );
     }
     console.log(`  ✅ ${searchQueries.length} search logs inserted.`);
@@ -595,58 +657,58 @@ async function runSeed() {
 
     // Customer 1: Yêu thích công nghệ (laptop, phụ kiện)
     const c1BehaviorRaw = [
-      ['Laptop ASUS TUF Gaming A15 2024',             'product_view',    null, 8],
-      ['Laptop ASUS TUF Gaming A15 2024',             'dwell_time_high', null, 25],
-      ['Laptop ASUS TUF Gaming A15 2024',             'cart_add',        null, 0],
-      ['MacBook Air M2 2023 - 8GB/256GB',             'product_view',    null, 10],
-      ['MacBook Air M2 2023 - 8GB/256GB',             'dwell_time_high', null, 30],
-      ['MacBook Air M2 2023 - 8GB/256GB',             'wishlist_add',    null, 0],
-      ['Laptop Dell XPS 13 9315 Ultra Slim',          'product_view',    null, 5],
-      ['Bàn phím cơ AKKO 3098B Ocean Blue CS Switch', 'search_click',    null, 0],
-      ['Bàn phím cơ AKKO 3098B Ocean Blue CS Switch', 'product_view',    null, 12],
-      ['Bàn phím cơ AKKO 3098B Ocean Blue CS Switch', 'cart_add',        null, 0],
-      ['Bàn phím cơ AKKO 3098B Ocean Blue CS Switch', 'purchase',        null, 0],
+      ['Laptop ASUS TUF Gaming A15 2024', 'product_view', null, 8],
+      ['Laptop ASUS TUF Gaming A15 2024', 'dwell_time_high', null, 25],
+      ['Laptop ASUS TUF Gaming A15 2024', 'cart_add', null, 0],
+      ['MacBook Air M2 2023 - 8GB/256GB', 'product_view', null, 10],
+      ['MacBook Air M2 2023 - 8GB/256GB', 'dwell_time_high', null, 30],
+      ['MacBook Air M2 2023 - 8GB/256GB', 'wishlist_add', null, 0],
+      ['Laptop Dell XPS 13 9315 Ultra Slim', 'product_view', null, 5],
+      ['Bàn phím cơ AKKO 3098B Ocean Blue CS Switch', 'search_click', null, 0],
+      ['Bàn phím cơ AKKO 3098B Ocean Blue CS Switch', 'product_view', null, 12],
+      ['Bàn phím cơ AKKO 3098B Ocean Blue CS Switch', 'cart_add', null, 0],
+      ['Bàn phím cơ AKKO 3098B Ocean Blue CS Switch', 'purchase', null, 0],
       ['Chuột gaming không dây Logitech G304 LightSpeed Trắng', 'product_view', null, 6],
       ['Chuột gaming không dây Logitech G304 LightSpeed Trắng', 'wishlist_add', null, 0],
     ];
 
     // Customer 2: Yêu thích thời trang nữ
     const c2BehaviorRaw = [
-      ['Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư',      'search_click',    null, 0],
-      ['Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư',      'product_view',    null, 18],
-      ['Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư',      'dwell_time_high', null, 22],
-      ['Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư',      'cart_add',        null, 0],
-      ['Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư',      'purchase',        null, 0],
-      ['Chân Váy Xếp Ly Tennis Cạp Cao Năng Động',   'product_view',    null, 9],
-      ['Chân Váy Xếp Ly Tennis Cạp Cao Năng Động',   'wishlist_add',    null, 0],
-      ['Áo Thun Nữ Tay Lỡ Form Rộng Oversize',       'product_view',    null, 7],
-      ['Áo Thun Nữ Tay Lỡ Form Rộng Oversize',       'cart_add',        null, 0],
+      ['Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư', 'search_click', null, 0],
+      ['Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư', 'product_view', null, 18],
+      ['Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư', 'dwell_time_high', null, 22],
+      ['Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư', 'cart_add', null, 0],
+      ['Váy Đầm Nữ Hoa Nhí Dáng Xòe Tiểu Thư', 'purchase', null, 0],
+      ['Chân Váy Xếp Ly Tennis Cạp Cao Năng Động', 'product_view', null, 9],
+      ['Chân Váy Xếp Ly Tennis Cạp Cao Năng Động', 'wishlist_add', null, 0],
+      ['Áo Thun Nữ Tay Lỡ Form Rộng Oversize', 'product_view', null, 7],
+      ['Áo Thun Nữ Tay Lỡ Form Rộng Oversize', 'cart_add', null, 0],
     ];
 
     // Customer 3: Yêu thích high-end tech + thể thao
     const c3BehaviorRaw = [
-      ['iPhone 15 Pro 256GB Titan Đen',               'product_view',    null, 20],
-      ['iPhone 15 Pro 256GB Titan Đen',               'dwell_time_high', null, 35],
-      ['iPhone 15 Pro 256GB Titan Đen',               'cart_add',        null, 0],
-      ['iPhone 15 Pro 256GB Titan Đen',               'purchase',        null, 0],
-      ['Samsung Galaxy S24 Ultra 256GB',              'product_view',    null, 8],
-      ['Tai nghe chống ồn Sony WH-1000XM5',           'product_view',    null, 15],
-      ['Tai nghe chống ồn Sony WH-1000XM5',           'dwell_time_high', null, 28],
-      ['Tai nghe chống ồn Sony WH-1000XM5',           'wishlist_add',    null, 0],
+      ['iPhone 15 Pro 256GB Titan Đen', 'product_view', null, 20],
+      ['iPhone 15 Pro 256GB Titan Đen', 'dwell_time_high', null, 35],
+      ['iPhone 15 Pro 256GB Titan Đen', 'cart_add', null, 0],
+      ['iPhone 15 Pro 256GB Titan Đen', 'purchase', null, 0],
+      ['Samsung Galaxy S24 Ultra 256GB', 'product_view', null, 8],
+      ['Tai nghe chống ồn Sony WH-1000XM5', 'product_view', null, 15],
+      ['Tai nghe chống ồn Sony WH-1000XM5', 'dwell_time_high', null, 28],
+      ['Tai nghe chống ồn Sony WH-1000XM5', 'wishlist_add', null, 0],
       ['Robot Hút Bụi Lau Nhà Thông Minh Xiaomi Vacuum Mop Pro S', 'product_view', null, 10],
-      ['Đồng Hồ Thông Minh Samsung Galaxy Watch 6 44mm', 'product_view',  null, 12],
+      ['Đồng Hồ Thông Minh Samsung Galaxy Watch 6 44mm', 'product_view', null, 12],
     ];
 
     // Customer 4: Yêu thích thời trang + giày
     const c4BehaviorRaw = [
-      ['Giày Nike Air Max 270 Nam Đen Size 42',        'product_view',    null, 14],
-      ['Giày Nike Air Max 270 Nam Đen Size 42',        'wishlist_add',    null, 0],
-      ['Giày Adidas Ultraboost 22 Nam Trắng Size 41',  'search_click',    null, 0],
-      ['Giày Adidas Ultraboost 22 Nam Trắng Size 41',  'product_view',    null, 18],
-      ['Giày Adidas Ultraboost 22 Nam Trắng Size 41',  'cart_add',        null, 0],
-      ['Nồi Chiên Không Dầu Philips HD9270/90 XL 6.2L', 'product_view',  null, 6],
+      ['Giày Nike Air Max 270 Nam Đen Size 42', 'product_view', null, 14],
+      ['Giày Nike Air Max 270 Nam Đen Size 42', 'wishlist_add', null, 0],
+      ['Giày Adidas Ultraboost 22 Nam Trắng Size 41', 'search_click', null, 0],
+      ['Giày Adidas Ultraboost 22 Nam Trắng Size 41', 'product_view', null, 18],
+      ['Giày Adidas Ultraboost 22 Nam Trắng Size 41', 'cart_add', null, 0],
+      ['Nồi Chiên Không Dầu Philips HD9270/90 XL 6.2L', 'product_view', null, 6],
       ['Nồi Chiên Không Dầu Philips HD9270/90 XL 6.2L', 'dwell_time_high', null, 20],
-      ['Áo Polo Nam Cotton Premium Cá Sấu',           'product_view',    null, 5],
+      ['Áo Polo Nam Cotton Premium Cá Sấu', 'product_view', null, 5],
     ];
 
     const userBehaviorMap = [
@@ -665,8 +727,8 @@ async function runSeed() {
         await connection.query(
           `INSERT INTO user_behavior_logs (user_id, session_id, product_id, action_type, weight, dwell_seconds)
            VALUES (?, ?, ?, ?, ?, ?)`,
-          [userId, `sess_${userId}_${Math.random().toString(36).substr(2,6)}`,
-           product.id, actionType, weight, dwellSeconds]
+          [userId, `sess_${userId}_${Math.random().toString(36).substr(2, 6)}`,
+            product.id, actionType, weight, dwellSeconds]
         );
         totalBehaviorLogs++;
       }

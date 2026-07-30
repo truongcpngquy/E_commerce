@@ -38,6 +38,15 @@ exports.getBrands = async (req, res) => {
   }
 };
 
+exports.getPopularTags = async (req, res) => {
+  try {
+    const tags = await productService.getPopularTags();
+    res.json(tags);
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi server khi lấy thẻ tags phổ biến!', error: err.message });
+  }
+};
+
 exports.searchSuggest = async (req, res) => {
   try {
     const suggestions = await productService.searchSuggest(req.query.q);

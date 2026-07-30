@@ -25,6 +25,18 @@ export const fetchSimilarProducts = createAsyncThunk(
   }
 );
 
+export const fetchSearchBasedRecommendations = createAsyncThunk(
+  'recommendation/fetchSearchBased',
+  async (limit, { rejectWithValue }) => {
+    try {
+      const data = await recommendationApi.getSearchBasedRecommendations(limit);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Lỗi tải gợi ý theo lịch sử tìm kiếm');
+    }
+  }
+);
+
 export const trackUserInteraction = createAsyncThunk(
   'recommendation/trackInteraction',
   async ({ productId, type }, { rejectWithValue }) => {
@@ -42,14 +54,17 @@ const recommendationSlice = createSlice({
   initialState: {
     personalizedList: [],
     similarList: [],
+    searchBasedList: [],
     loadingPersonalized: false,
     loadingSimilar: false,
+    loadingSearchBased: false,
     error: null,
   },
   reducers: {
     clearRecommendations: (state) => {
       state.personalizedList = [];
       state.similarList = [];
+      state.searchBasedList = [];
     },
   },
   extraReducers: (builder) => {
@@ -76,6 +91,18 @@ const recommendationSlice = createSlice({
       })
       .addCase(fetchSimilarProducts.rejected, (state, action) => {
         state.loadingSimilar = false;
+        state.error = action.payload;
+      })
+      // Search-Based
+      .addCase(fetchSearchBasedRecommendations.pending, (state) => {
+        state.loadingSearchBased = true;
+      })
+      .addCase(fetchSearchBasedRecommendations.fulfilled, (state, action) => {
+        state.loadingSearchBased = false;
+        state.searchBasedList = action.payload || [];
+      })
+      .addCase(fetchSearchBasedRecommendations.rejected, (state, action) => {
+        state.loadingSearchBased = false;
         state.error = action.payload;
       });
   },

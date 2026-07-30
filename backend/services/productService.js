@@ -11,12 +11,23 @@ function normalizeQuery(text) {
     .trim();
 }
 
+function slugify(text) {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 class ProductService {
   /**
-   * Lấy danh sách sản phẩm với bộ lọc đa chiều
+   * Lấy danh sách sản phẩm với bộ lọc đa chiều & chuẩn 3NF Tag Filter
    */
   async getAllProducts(filters = {}) {
-    const { category, brand, search, limit = 20, offset = 0, sort = 'newest', min_price, max_price } = filters;
+    const { category, brand, tag, search, limit = 20, offset = 0, sort = 'newest', min_price, max_price } = filters;
 
     let query = `
       SELECT p.*,
@@ -56,6 +67,18 @@ class ProductService {
       query += ' AND (p.name LIKE ? OR p.description LIKE ? OR p.tags LIKE ?)';
       const searchParam = `%${search}%`;
       params.push(searchParam, searchParam, searchParam);
+    }
+
+    if (tag) {
+      query += ` AND p.id IN (
+        SELECT pt.product_id
+        FROM product_tags pt
+        JOIN tags t ON pt.tag_id = t.id
+        WHERE t.name LIKE ? OR t.slug LIKE ?
+      )`;
+      const tagParam = `%${tag}%`;
+      const tagSlugParam = `%${slugify(tag)}%`;
+      params.push(tagParam, tagSlugParam);
     }
 
     switch (sort) {
@@ -116,6 +139,12 @@ class ProductService {
     );
     product.attributes = attributes;
 
+    const [tagRows] = await db.query(
+      `SELECT t.name, t.slug, t.type FROM tags t JOIN product_tags pt ON t.id = pt.tag_id WHERE pt.product_id = ?`,
+      [id]
+    );
+    product.tag_list = tagRows;
+
     // Tăng lượt xem ngầm
     db.query(
       `INSERT INTO product_metrics (product_id, views_count, popularity_score)
@@ -127,6 +156,19 @@ class ProductService {
     ).catch(e => console.error('Lỗi tăng views_count:', e.message));
 
     return product;
+  }
+
+  /**
+   * Lấy danh sách thẻ Tags phổ biến (phân loại theo Type: Style, Tech, Usage, Segment)
+   */
+  async getPopularTags() {
+    const [tags] = await db.query(
+      `SELECT id, name, slug, type, usage_count, is_trending
+       FROM tags
+       ORDER BY is_trending DESC, usage_count DESC, id ASC
+       LIMIT 20`
+    );
+    return tags;
   }
 
   /**
@@ -221,7 +263,7 @@ class ProductService {
 
     const [products] = await db.query(query, sqlParams);
 
-    // Ghi nhật ký async vào search_logs
+    // Ghi nhật ký async vào search_logs & tăng search_count cho tags
     const firstMatchId = products.length > 0 ? products[0].id : null;
     db.query(
       `INSERT INTO search_logs (user_id, session_id, query_text, normalized_query, filters_applied, results_count, clicked_product_id)
@@ -237,11 +279,16 @@ class ProductService {
       ]
     ).catch(err => console.error('Lỗi lưu search_log:', err.message));
 
+    db.query(
+      `UPDATE tags SET search_count = search_count + 1 WHERE name LIKE ? OR slug LIKE ?`,
+      [searchTerm, `%${slugify(q)}%`]
+    ).catch(() => {});
+
     return products;
   }
 
   /**
-   * Thêm sản phẩm mới (Dành cho Seller)
+   * Thêm sản phẩm mới kèm gán Tag chuẩn 3NF vào product_tags
    */
   async createProduct(sellerId, productData) {
     const { name, description, price, original_price, stock, image_url, category_id, brand_id, tags, attributes } = productData;
@@ -259,11 +306,12 @@ class ProductService {
       const sku = `SKU-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       const origPrice = original_price || price;
       const discount = origPrice > price ? Math.round(((origPrice - price) / origPrice) * 100) : 0;
+      const tagsStr = Array.isArray(tags) ? tags.join(', ') : (tags || '');
 
       const [result] = await connection.query(
         `INSERT INTO products (seller_id, brand_id, category_id, sku, name, description, original_price, discount_percent, price, stock, image_url, tags, status)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')`,
-        [sellerId, brand_id || null, category_id, sku, name, description || '', origPrice, discount, price, stock || 0, image_url || '', tags || '']
+        [sellerId, brand_id || null, category_id, sku, name, description || '', origPrice, discount, price, stock || 0, image_url || '', tagsStr]
       );
 
       const productId = result.insertId;
@@ -273,12 +321,34 @@ class ProductService {
         [productId]
       );
 
+      // Thêm thuộc tính EAV
       if (attributes && Array.isArray(attributes) && attributes.length > 0) {
         const attrValues = attributes.map(a => [productId, a.key || a.attribute_key, a.value || a.attribute_value]);
         await connection.query(
           'INSERT INTO product_attributes (product_id, attribute_key, attribute_value) VALUES ?',
           [attrValues]
         );
+      }
+
+      // Xử lý chèn vào Bảng chuẩn tags & product_tags
+      if (tagsStr) {
+        const tagList = tagsStr.split(',').map(t => t.trim()).filter(Boolean);
+        for (const tagName of tagList) {
+          const tagSlug = slugify(tagName);
+          await connection.query(
+            `INSERT INTO tags (name, slug, usage_count)
+             VALUES (?, ?, 1)
+             ON DUPLICATE KEY UPDATE usage_count = usage_count + 1`,
+            [tagName, tagSlug]
+          );
+          const [tagRow] = await connection.query('SELECT id FROM tags WHERE slug = ?', [tagSlug]);
+          if (tagRow.length > 0) {
+            await connection.query(
+              'INSERT IGNORE INTO product_tags (product_id, tag_id) VALUES (?, ?)',
+              [productId, tagRow[0].id]
+            );
+          }
+        }
       }
 
       await connection.commit();
