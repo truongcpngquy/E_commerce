@@ -1,0 +1,326 @@
+/* Banner Style */
+.home-banner {
+  background: linear-gradient(135deg, #2c3e50, #0f2027);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px;
+  color: var(--white);
+  margin-bottom: 40px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+.banner-content {
+  max-width: 60%;
+  z-index: 2;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.banner-badge {
+  background: var(--primary-color);
+  color: var(--white);
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.banner-title {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 15px 0 10px 0;
+  line-height: 1.2;
+}
+
+.banner-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  opacity: 0.85;
+  margin-bottom: 25px;
+}
+
+.banner-btn {
+  background: var(--white);
+  color: var(--primary-color);
+  padding: 12px 25px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.banner-btn:hover {
+  background: var(--primary-color);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+.banner-image {
+  max-width: 35%;
+  display: flex;
+  justify-content: center;
+  z-index: 1;
+}
+
+.banner-image img {
+  width: 100%;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  object-fit: cover;
+}
+
+/* Categories Section */
+.categories-section {
+  margin-bottom: 40px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-dark);
+}
+
+.icon-orange {
+  color: var(--primary-color);
+}
+
+.categories-grid {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.category-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 15px;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.category-card:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-sm);
+}
+
+.category-card.active {
+  border-color: var(--primary-color);
+  background: rgba(238, 77, 45, 0.03);
+}
+
+.category-img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.category-img-placeholder {
+  font-size: 30px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-name {
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--text-dark);
+}
+
+/* Recommendations Section */
+.recommendations-section {
+  background: linear-gradient(135deg, rgba(238, 77, 45, 0.05), rgba(255, 102, 0, 0.08));
+  border: 1.5px solid rgba(238, 77, 45, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 25px;
+  margin-bottom: 40px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.text-sparkle {
+  color: #d35400;
+  font-weight: 700;
+}
+
+.icon-sparkle {
+  color: #f39c12;
+}
+
+.algorithm-badge {
+  background: rgba(243, 156, 18, 0.15);
+  color: #d35400;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.recommend-card {
+  position: relative;
+  border: 1.5px solid rgba(238, 77, 45, 0.15) !important;
+}
+
+.recommend-card:hover {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15) !important;
+}
+
+.similarity-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #f39c12, #ee4d2d);
+  color: var(--white);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 700;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Products Grid & Cards */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.product-card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(0,0,0,0.1);
+}
+
+.product-img-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* Ratio 1:1 Square */
+  overflow: hidden;
+}
+
+.product-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--transition);
+}
+
+.product-card:hover .product-img {
+  transform: scale(1.05);
+}
+
+.product-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.product-name {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  height: 40px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.product-tags {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  min-height: 20px;
+}
+
+.tag-pill {
+  background: var(--background-light);
+  color: var(--text-gray);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.product-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.product-price {
+  color: var(--primary-color);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.product-sales {
+  color: var(--text-light);
+  font-size: 11px;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+.empty-products {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-light);
+  background: var(--white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
