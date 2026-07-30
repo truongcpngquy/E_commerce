@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '../hooks/useReduxHooks';
-import { loginUser, signupUser } from '../store/slices/authSlice';
+import { useAppDispatch } from '../../hooks/useReduxHooks';
+import { loginUser, signupUser } from '../../store/slices/authSlice';
 import './Auth.css';
 
 export default function Auth() {

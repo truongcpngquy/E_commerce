@@ -27,50 +27,42 @@ class ProductService {
    * Lấy danh sách sản phẩm với bộ lọc đa chiều & chuẩn 3NF Tag Filter
    */
   async getAllProducts(filters = {}) {
-    const { category, brand, tag, search, limit = 20, offset = 0, sort = 'newest', min_price, max_price } = filters;
+    const { category, brand, tag, search, sort = 'newest', min_price, max_price } = filters;
+    const page = Math.max(1, Number(filters.page) || 1);
+    const limit = Math.max(1, Number(filters.limit) || 8);
+    const offset = (page - 1) * limit;
 
-    let query = `
-      SELECT p.*,
-             c.name as category_name, c.slug as category_slug,
-             b.name as brand_name, b.logo_url as brand_logo,
-             pm.views_count, pm.carts_count, pm.purchases_count,
-             pm.rating_avg, pm.rating_count, pm.popularity_score
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN brands b ON p.brand_id = b.id
-      LEFT JOIN product_metrics pm ON p.id = pm.product_id
-      WHERE p.status = 'active'
-    `;
-    const params = [];
+    let baseWhere = ` WHERE p.status = 'active'`;
+    const whereParams = [];
 
     if (category) {
-      query += ' AND (p.category_id = ? OR c.parent_id = ?)';
-      params.push(category, category);
+      baseWhere += ' AND (p.category_id = ? OR c.parent_id = ?)';
+      whereParams.push(category, category);
     }
 
     if (brand) {
-      query += ' AND p.brand_id = ?';
-      params.push(brand);
+      baseWhere += ' AND p.brand_id = ?';
+      whereParams.push(brand);
     }
 
     if (min_price) {
-      query += ' AND p.price >= ?';
-      params.push(Number(min_price));
+      baseWhere += ' AND p.price >= ?';
+      whereParams.push(Number(min_price));
     }
 
     if (max_price) {
-      query += ' AND p.price <= ?';
-      params.push(Number(max_price));
+      baseWhere += ' AND p.price <= ?';
+      whereParams.push(Number(max_price));
     }
 
     if (search) {
-      query += ' AND (p.name LIKE ? OR p.description LIKE ? OR p.tags LIKE ?)';
+      baseWhere += ' AND (p.name LIKE ? OR p.description LIKE ? OR p.tags LIKE ?)';
       const searchParam = `%${search}%`;
-      params.push(searchParam, searchParam, searchParam);
+      whereParams.push(searchParam, searchParam, searchParam);
     }
 
     if (tag) {
-      query += ` AND p.id IN (
+      baseWhere += ` AND p.id IN (
         SELECT pt.product_id
         FROM product_tags pt
         JOIN tags t ON pt.tag_id = t.id
@@ -78,8 +70,36 @@ class ProductService {
       )`;
       const tagParam = `%${tag}%`;
       const tagSlugParam = `%${slugify(tag)}%`;
-      params.push(tagParam, tagSlugParam);
+      whereParams.push(tagParam, tagSlugParam);
     }
+
+    // 1. Đếm tổng số bản ghi thỏa điều kiện
+    const countSql = `
+      SELECT COUNT(DISTINCT p.id) as total
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN brands b ON p.brand_id = b.id
+      ${baseWhere}
+    `;
+    const [[countRow]] = await db.query(countSql, whereParams);
+    const total = countRow ? Number(countRow.total) : 0;
+
+    // 2. Truy vấn danh sách sản phẩm theo phân trang
+    let query = `
+      SELECT p.*,
+             c.name as category_name, c.slug as category_slug,
+             b.name as brand_name, b.logo_url as brand_logo,
+             st.name as store_name, st.logo_url as store_logo, st.slug as store_slug, st.is_official as store_is_official,
+             pm.views_count, pm.carts_count, pm.purchases_count,
+             pm.rating_avg, pm.rating_count, pm.popularity_score
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN brands b ON p.brand_id = b.id
+      LEFT JOIN stores st ON p.store_id = st.id
+      LEFT JOIN product_metrics pm ON p.id = pm.product_id
+      ${baseWhere}
+    `;
+    const queryParams = [...whereParams];
 
     switch (sort) {
       case 'popularity':
@@ -101,25 +121,40 @@ class ProductService {
     }
 
     query += ' LIMIT ? OFFSET ?';
-    params.push(Number(limit), Number(offset));
+    queryParams.push(limit, offset);
 
-    const [products] = await db.query(query, params);
-    return products;
+    const [products] = await db.query(query, queryParams);
+
+    return {
+      products,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit) || 1,
+        hasMore: (page * limit) < total
+      }
+    };
   }
 
   /**
-   * Lấy chi tiết 1 sản phẩm kèm thuộc tính EAV & tăng lượt xem ngầm
+   * Lấy chi tiết 1 sản phẩm kèm thuộc tính EAV & thông tin Cửa Hàng
    */
   async getProductById(id) {
     const [products] = await db.query(
       `SELECT p.*,
               c.name as category_name, c.slug as category_slug,
               b.name as brand_name, b.logo_url as brand_logo,
+              st.id as store_id, st.name as store_name, st.logo_url as store_logo, st.slug as store_slug,
+              st.description as store_description, st.rating_avg as store_rating_avg,
+              st.followers_count as store_followers_count, st.response_rate as store_response_rate,
+              st.response_time as store_response_time, st.is_official as store_is_official,
               pm.views_count, pm.carts_count, pm.purchases_count,
               pm.rating_avg, pm.rating_count, pm.popularity_score
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN brands b ON p.brand_id = b.id
+       LEFT JOIN stores st ON p.store_id = st.id
        LEFT JOIN product_metrics pm ON p.id = pm.product_id
        WHERE p.id = ?`,
       [id]
@@ -175,7 +210,17 @@ class ProductService {
    * Lấy danh mục 2 cấp
    */
   async getCategories() {
-    const [categories] = await db.query('SELECT * FROM categories ORDER BY level ASC, sort_order ASC');
+    const [categories] = await db.query(`
+      SELECT c.*,
+        (
+          SELECT COUNT(*)
+          FROM products p
+          WHERE p.status = 'active'
+            AND (p.category_id = c.id OR p.category_id IN (SELECT id FROM categories WHERE parent_id = c.id))
+        ) as product_count
+      FROM categories c
+      ORDER BY c.level ASC, c.sort_order ASC, c.id ASC
+    `);
     return categories;
   }
 
@@ -227,14 +272,55 @@ class ProductService {
    * Smart Search API & Tự động ghi log search_logs
    */
   async searchProducts(params = {}, userId = null) {
-    const { q, category, brand, min_price, max_price, limit = 20, offset = 0 } = params;
+    const searchStr = params.q || params.search || params.query || '';
+    const { category, brand, tag, min_price, max_price } = params;
+    const page = Math.max(1, Number(params.page) || 1);
+    const limit = Math.max(1, Number(params.limit) || 8);
+    const offset = (page - 1) * limit;
 
-    if (!q || q.trim().length === 0) {
-      return [];
+    if (!searchStr.trim() && !tag && !category && !brand) {
+      return { products: [], pagination: { total: 0, page: 1, limit, totalPages: 1, hasMore: false } };
     }
 
-    const searchTerm = `%${q.trim()}%`;
-    const normalized = normalizeQuery(q);
+    let baseWhere = ` WHERE p.status = 'active'`;
+    const sqlParams = [];
+
+    if (searchStr.trim()) {
+      baseWhere += ' AND (p.name LIKE ? OR p.description LIKE ? OR p.tags LIKE ?)';
+      const searchTerm = `%${searchStr.trim()}%`;
+      sqlParams.push(searchTerm, searchTerm, searchTerm);
+    }
+
+    if (category) {
+      baseWhere += ' AND (p.category_id = ? OR c.parent_id = ?)';
+      sqlParams.push(category, category);
+    }
+    if (brand) {
+      baseWhere += ' AND p.brand_id = ?';
+      sqlParams.push(brand);
+    }
+    if (tag) {
+      baseWhere += ` AND p.id IN (
+        SELECT pt.product_id
+        FROM product_tags pt
+        JOIN tags t ON pt.tag_id = t.id
+        WHERE t.name LIKE ? OR t.slug LIKE ?
+      )`;
+      const tagParam = `%${tag}%`;
+      const tagSlugParam = `%${slugify(tag)}%`;
+      sqlParams.push(tagParam, tagSlugParam);
+    }
+
+    // Đếm tổng số bản ghi
+    const countSql = `
+      SELECT COUNT(DISTINCT p.id) as total
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN brands b ON p.brand_id = b.id
+      ${baseWhere}
+    `;
+    const [[countRow]] = await db.query(countSql, sqlParams);
+    const total = countRow ? Number(countRow.total) : 0;
 
     let query = `
       SELECT p.*,
@@ -245,46 +331,63 @@ class ProductService {
       LEFT JOIN categories c ON p.category_id = c.id
       LEFT JOIN brands b ON p.brand_id = b.id
       LEFT JOIN product_metrics pm ON p.id = pm.product_id
-      WHERE p.status = 'active' AND (p.name LIKE ? OR p.description LIKE ? OR p.tags LIKE ?)
+      ${baseWhere}
+      ORDER BY pm.popularity_score DESC LIMIT ? OFFSET ?
     `;
-    const sqlParams = [searchTerm, searchTerm, searchTerm];
+    const queryParams = [...sqlParams, limit, offset];
+    const [products] = await db.query(query, queryParams);
 
-    if (category) {
-      query += ' AND (p.category_id = ? OR c.parent_id = ?)';
-      sqlParams.push(category, category);
+    let fallbackProducts = [];
+    if (products.length === 0) {
+      const [fProducts] = await db.query(`
+        SELECT p.*,
+               c.name as category_name,
+               b.name as brand_name,
+               pm.rating_avg, pm.rating_count, pm.popularity_score
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+        LEFT JOIN brands b ON p.brand_id = b.id
+        LEFT JOIN product_metrics pm ON p.id = pm.product_id
+        WHERE p.status = 'active'
+        ORDER BY pm.popularity_score DESC, pm.purchases_count DESC
+        LIMIT 8
+      `);
+      fallbackProducts = fProducts;
     }
-    if (brand) {
-      query += ' AND p.brand_id = ?';
-      sqlParams.push(brand);
-    }
-
-    query += ' ORDER BY pm.popularity_score DESC LIMIT ? OFFSET ?';
-    sqlParams.push(Number(limit), Number(offset));
-
-    const [products] = await db.query(query, sqlParams);
 
     // Ghi nhật ký async vào search_logs & tăng search_count cho tags
-    const firstMatchId = products.length > 0 ? products[0].id : null;
-    db.query(
-      `INSERT INTO search_logs (user_id, session_id, query_text, normalized_query, filters_applied, results_count, clicked_product_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
-        userId,
-        `sess_${Date.now()}`,
-        q.trim(),
-        normalized,
-        JSON.stringify({ category, brand, min_price, max_price }),
-        products.length,
-        firstMatchId
-      ]
-    ).catch(err => console.error('Lỗi lưu search_log:', err.message));
+    if (searchStr.trim()) {
+      const normalized = normalizeQuery(searchStr);
+      db.query(
+        `INSERT INTO search_logs (user_id, session_id, query_text, normalized_query, filters_applied, results_count, clicked_product_id)
+         VALUES (?, ?, ?, ?, ?, ?, NULL)`,
+        [
+          userId,
+          `sess_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          searchStr.trim(),
+          normalized,
+          JSON.stringify({ category, brand, tag }),
+          total
+        ]
+      ).catch(e => console.error('Lỗi ghi search log:', e.message));
 
-    db.query(
-      `UPDATE tags SET search_count = search_count + 1 WHERE name LIKE ? OR slug LIKE ?`,
-      [searchTerm, `%${slugify(q)}%`]
-    ).catch(() => {});
+      db.query(
+        `UPDATE tags SET search_count = search_count + 1 WHERE name LIKE ? OR slug LIKE ?`,
+        [`%${searchStr.trim()}%`, `%${slugify(searchStr.trim())}%`]
+      ).catch(e => console.error('Lỗi tăng tag search_count:', e.message));
+    }
 
-    return products;
+    return {
+      products,
+      fallbackProducts,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit) || 1,
+        hasMore: (page * limit) < total
+      }
+    };
   }
 
   /**

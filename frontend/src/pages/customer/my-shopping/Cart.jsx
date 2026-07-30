@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../hooks/useReduxHooks';
-import { updateCartItem, removeFromCart } from '../store/slices/cartSlice';
+import { useAppDispatch, useAppSelector } from '../../../hooks/useReduxHooks';
+import { updateCartItem, removeFromCart } from '../../../store/slices/cartSlice';
 import { Trash2, ShoppingBag } from 'lucide-react';
 import './Cart.css';
 

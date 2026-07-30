@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS product_attributes;
 DROP TABLE IF EXISTS product_tags;
 DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS stores;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS brands;
 DROP TABLE IF EXISTS user_contexts;
@@ -112,6 +113,33 @@ CREATE TABLE IF NOT EXISTS categories (
 ) ENGINE=InnoDB;
 
 -- =============================================================
+-- MODULE 2.5: GIAN HÀNG & CỬA HÀNG (MERCHANT STORES)
+-- =============================================================
+
+-- 5.5. Bảng Stores (Gian hàng Cửa hàng của Người Bán)
+CREATE TABLE IF NOT EXISTS stores (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    owner_id        INT NOT NULL,
+    name            VARCHAR(255) NOT NULL,
+    slug            VARCHAR(255) UNIQUE NOT NULL,
+    logo_url        VARCHAR(500),
+    banner_url      VARCHAR(500),
+    description     TEXT,
+    rating_avg      DECIMAL(3, 2) DEFAULT 5.00,
+    followers_count INT DEFAULT 0,
+    response_rate   DECIMAL(5, 2) DEFAULT 99.00,
+    response_time   VARCHAR(100) DEFAULT 'Trong vài phút',
+    is_official     TINYINT DEFAULT 0,
+    status          ENUM('active', 'suspended', 'pending') DEFAULT 'active',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_stores_slug (slug),
+    INDEX idx_stores_owner (owner_id),
+    INDEX idx_stores_official (is_official)
+) ENGINE=InnoDB;
+
+-- =============================================================
 -- MODULE 3: SẢN PHẨM ĐA CHIỀU (RICH PRODUCT CONTENT & TAGS ENGINE)
 -- =============================================================
 
@@ -119,6 +147,7 @@ CREATE TABLE IF NOT EXISTS categories (
 CREATE TABLE IF NOT EXISTS products (
     id               INT AUTO_INCREMENT PRIMARY KEY,
     seller_id        INT,
+    store_id         INT,
     brand_id         INT,
     category_id      INT,
     sku              VARCHAR(100) UNIQUE,
@@ -134,8 +163,10 @@ CREATE TABLE IF NOT EXISTS products (
     created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (seller_id)   REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (store_id)    REFERENCES stores(id) ON DELETE SET NULL,
     FOREIGN KEY (brand_id)    REFERENCES brands(id) ON DELETE SET NULL,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
+    INDEX idx_products_store (store_id),
     INDEX idx_products_category (category_id),
     INDEX idx_products_brand (brand_id),
     INDEX idx_products_status (status),

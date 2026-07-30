@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useAppDispatch, useAppSelector } from '../hooks/useReduxHooks';
-import { createProduct } from '../store/slices/productSlice';
+import { useAppDispatch, useAppSelector } from '../../../hooks/useReduxHooks';
+import { createProduct } from '../../../store/slices/productSlice';
 import { Link } from 'react-router-dom';
 import { PlusCircle, Info, ShieldAlert } from 'lucide-react';
 import './SellerDashboard.css';
@@ -195,7 +195,7 @@ export default function SellerDashboard() {
           </h3>
           <div className="info-content">
             <p>Hệ thống của chúng tôi tự động hóa việc tính toán độ tương đồng giữa các sản phẩm để đưa ra gợi ý phù hợp nhất cho khách hàng.</p>
-            
+
             <div className="info-tip">
               <strong>💡 Mẹo gán Tags hiệu quả:</strong>
               <ul>

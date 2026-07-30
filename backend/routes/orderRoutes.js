@@ -8,5 +8,6 @@ router.use(authMiddleware);
 router.get('/', orderController.getOrders);
 router.get('/:id', orderController.getOrderById);
 router.post('/', orderController.createOrder);
+router.put('/:id/status', orderController.updateOrderStatus);
 
 module.exports = router;

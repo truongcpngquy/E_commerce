@@ -7,7 +7,7 @@ import { trackUserInteraction } from '../store/slices/recommendationSlice';
 import { ShoppingCart, Search, User, LogOut, LayoutDashboard, ClipboardList, Sparkles, Tag } from 'lucide-react';
 import useDebounce from '../hooks/useDebounce';
 import productApi from '../api/productApi';
-import './Header.css';
+import '../styles/header.css';
 
 export default function Header() {
   const dispatch = useAppDispatch();
@@ -201,9 +201,13 @@ export default function Header() {
 
                 {showDropdown && (
                   <div className="user-dropdown">
+                    <Link to="/profile" className="dropdown-item">
+                      <User size={16} />
+                      Hồ sơ cá nhân
+                    </Link>
                     <Link to="/orders" className="dropdown-item">
                       <ClipboardList size={16} />
-                      Đơn mua
+                      Đơn mua của tôi
                     </Link>
                     {user.role === 'seller' && (
                       <Link to="/seller" className="dropdown-item">

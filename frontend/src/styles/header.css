@@ -1,0 +1,238 @@
+/* HEADER STYLES */
+.shopee-header {
+  background: linear-gradient(180deg, #f53d2d 0%, #f63 100%);
+  color: var(--white);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.logo-section {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: var(--white);
+}
+
+.logo-text {
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.logo-subtext {
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.9;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.search-wrapper {
+  flex: 1;
+  max-width: 650px;
+  position: relative;
+}
+
+.search-section {
+  display: flex;
+  background: var(--white);
+  border-radius: 4px;
+  overflow: hidden;
+  padding: 3px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 8px 14px;
+  font-size: 14px;
+  color: var(--text-dark);
+}
+
+.search-btn {
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  padding: 0 20px;
+  border-radius: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.search-btn:hover {
+  background: var(--primary-hover);
+}
+
+.search-suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  z-index: 1001;
+}
+
+.suggestion-keywords-group {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.suggestion-group-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-gray);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.keywords-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.keyword-pill {
+  background: #f5f5f5;
+  color: var(--text-dark);
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: var(--transition);
+}
+
+.keyword-pill:hover {
+  background: var(--primary-color);
+  color: var(--white);
+}
+
+.suggestion-products-group {
+  padding: 8px 0;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.suggestion-item:hover {
+  background: #fff5f2;
+}
+
+.suggestion-img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.suggestion-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.suggestion-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.suggestion-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.suggestion-price {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.actions-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.cart-icon-container {
+  position: relative;
+  color: var(--white);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.cart-count-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: var(--white);
+  color: var(--primary-color);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--primary-color);
+}
+
+.user-profile-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  position: relative;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--white);
+  color: var(--primary-color);
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-link {
+  color: var(--white);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

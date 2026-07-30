@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../hooks/useReduxHooks';
-import { createOrder } from '../store/slices/orderSlice';
+import { useAppDispatch, useAppSelector } from '../../../hooks/useReduxHooks';
+import { createOrder } from '../../../store/slices/orderSlice';
 import './Checkout.css';
 
 export default function Checkout() {
@@ -45,12 +45,12 @@ export default function Checkout() {
   return (
     <div className="checkout-page fade-in">
       <h1 className="page-title">Xác Nhận Thanh Toán</h1>
-      
+
       <div className="checkout-layout">
         {/* Cột trái: Thông tin giao hàng */}
         <form onSubmit={handlePlaceOrder} className="checkout-delivery-card">
           <h3 className="card-section-title">Địa chỉ nhận hàng</h3>
-          
+
           <div className="input-group-textarea">
             <label htmlFor="address">Địa chỉ chi tiết (Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố)</label>
             <textarea
@@ -73,9 +73,9 @@ export default function Checkout() {
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            className="place-order-submit-btn" 
+          <button
+            type="submit"
+            className="place-order-submit-btn"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Đang xử lý đặt hàng...' : 'Đặt hàng ngay'}
@@ -85,7 +85,7 @@ export default function Checkout() {
         {/* Cột phải: Xem trước đơn hàng */}
         <div className="checkout-preview-card">
           <h3 className="card-section-title">Chi tiết đơn hàng</h3>
-          
+
           <div className="preview-items-list">
             {cart.map((item) => (
               <div key={item.product_id} className="preview-item">
@@ -110,9 +110,9 @@ export default function Checkout() {
               <span>Phí vận chuyển:</span>
               <span className="shipping-free-label">Miễn phí</span>
             </div>
-            
+
             <div className="totals-divider"></div>
-            
+
             <div className="total-row-item final-total-row">
               <span>Tổng thanh toán:</span>
               <span className="final-price-value">{formatPrice(totalAmount)}</span>

@@ -154,6 +154,25 @@ class OrderService {
     order.items = items;
     return order;
   }
+
+  /**
+   * Cập nhật trạng thái Đơn hàng (Vd: pending -> completed / paid)
+   */
+  async updateOrderStatus(userId, orderId, status, payment_method) {
+    const [orders] = await db.query('SELECT id FROM orders WHERE id = ? AND user_id = ?', [orderId, userId]);
+    if (orders.length === 0) {
+      const err = new Error('Không tìm thấy đơn hàng!');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    await db.query(
+      'UPDATE orders SET status = COALESCE(?, status), payment_method = COALESCE(?, payment_method) WHERE id = ?',
+      [status, payment_method, orderId]
+    );
+
+    return this.getOrderById(userId, orderId);
+  }
 }
 
 module.exports = new OrderService();

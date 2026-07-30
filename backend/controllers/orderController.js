@@ -29,3 +29,14 @@ exports.getOrderById = async (req, res) => {
     res.status(status).json({ message: err.message || 'Lỗi server!' });
   }
 };
+
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { status, payment_method } = req.body;
+    const order = await orderService.updateOrderStatus(req.user.id, req.params.id, status, payment_method);
+    res.json({ message: 'Cập nhật trạng thái đơn hàng thành công!', order });
+  } catch (err) {
+    const status = err.statusCode || 500;
+    res.status(status).json({ message: err.message || 'Lỗi cập nhật trạng thái đơn hàng!' });
+  }
+};
