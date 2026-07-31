@@ -18,7 +18,7 @@ export default function BannerSection() {
         </p>
         <div className="flex gap-3">
           <Button type="primary" size="large" shape="round" className="bg-white text-orange-600 hover:bg-orange-50 font-bold border-none shadow-md flex items-center gap-2">
-            <Link to="/store/apple-official-store" className="no-underline text-orange-600">
+            <Link to="/store" className="no-underline text-orange-600">
               Khám phá Shopee Mall <ArrowRightOutlined />
             </Link>
           </Button>

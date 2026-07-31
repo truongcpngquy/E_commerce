@@ -81,7 +81,7 @@ async function runSeed() {
       'user_wishlist', 'product_vectors', 'product_metrics',
       'product_attributes', 'order_items', 'orders', 'cart_items',
       'product_tags', 'tags', 'products', 'stores', 'categories', 'brands', 'user_contexts',
-      'user_profiles', 'users',
+      'user_roles', 'roles', 'user_profiles', 'users',
     ];
     for (const tbl of tablesToTruncate) {
       await connection.query(`TRUNCATE TABLE \`${tbl}\``);
@@ -89,8 +89,17 @@ async function runSeed() {
     await connection.query('SET FOREIGN_KEY_CHECKS = 1');
     console.log('✅ Old data cleared.\n');
 
-    // 1. USERS
-    console.log('👤 Seeding 20 Users...');
+    // 0. ROLES
+    console.log('🛡️ Seeding Roles...');
+    await connection.query(`
+      INSERT INTO roles (id, name, description) VALUES
+      (1, 'customer', 'Khách mua hàng trên hệ thống'),
+      (2, 'seller', 'Người bán hàng quản lý gian hàng'),
+      (3, 'admin', 'Quản trị viên toàn hệ thống')
+    `);
+
+    // 1. USERS & USER_ROLES
+    console.log('👤 Seeding 20 Users & User_Roles mapping...');
     const salt = bcrypt.genSaltSync(10);
     const pw = bcrypt.hashSync('123456', salt);
 
@@ -121,6 +130,12 @@ async function runSeed() {
     const [dbUsers] = await connection.query('SELECT id, username, role FROM users');
     const userMap = Object.fromEntries(dbUsers.map(u => [u.username, u.id]));
     const customerIds = dbUsers.filter(u => u.role === 'customer').map(u => u.id);
+
+    // Gán bảng user_roles trung gian
+    const roleIdMap = { customer: 1, seller: 2, admin: 3 };
+    const userRolesData = dbUsers.map(u => [u.id, roleIdMap[u.role] || 1]);
+    await connection.query('INSERT INTO user_roles (user_id, role_id) VALUES ?', [userRolesData]);
+    console.log('✅ Roles & User_Roles seeded successfully.\n');
 
     // 2. USER PROFILES
     console.log('🪪 Seeding User Profiles...');
@@ -452,7 +467,61 @@ async function runSeed() {
         'active'
       ],
 
-      // ── Thời trang & Thể thao ──
+      // ── Thời trang & Thể thao (Áo & Quần) ──
+      [
+        s1, stNike, brandMap['nike'], catMap['quan-ao-the-thao'], 'NIKE-DRIFIT-TSHIRT-01',
+        'Áo Thể Thao Nike Dri-FIT Running Men',
+        'Áo thun nam Nike công nghệ Dri-FIT thấm hút mồ hôi vượt trội, chất liệu polyester thoáng khí cho tập gym và chạy bộ.',
+        990000, 15, 840000, 80,
+        'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600',
+        'áo, áo thun, áo thể thao, nike, dri-fit, chạy bộ, gym, nam, thời trang thể thao, chính hãng',
+        'active'
+      ],
+      [
+        s2, stAdidas, brandMap['adidas'], catMap['quan-ao-the-thao'], 'ADIDAS-WIND-JACKET-02',
+        'Áo Khoác Gió Adidas Performance Essentials',
+        'Áo khoác dù nam Adidas chống nước nhẹ, cản gió tuyệt đối, logo 3 lá thêu nổi bật, tích hợp túi khóa kéo bảo vệ đồ cá nhân.',
+        1690000, 12, 1450000, 50,
+        'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600',
+        'áo, áo khoác, áo gió, adidas, thể thao, chống nước, cản gió, khoác nam, phong cách',
+        'active'
+      ],
+      [
+        s1, stNike, brandMap['nike'], catMap['thoi-trang-nam'], 'NIKE-POLO-SPORTSWEAR-03',
+        'Áo Polo Nam Nike Sportswear Classic Fit',
+        'Áo polo nam Nike cổ bẻ vải cotton cao cấp co giãn 4 chiều, thêu logo Nike Swoosh sang trọng lịch lãm.',
+        1190000, 20, 950000, 60,
+        'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=600',
+        'áo, áo polo, nike, thời trang nam, cổ bẻ, công sở, cao cấp, đi chơi',
+        'active'
+      ],
+      [
+        s2, stAdidas, brandMap['adidas'], catMap['thoi-trang-nam'], 'ADIDAS-TREFOIL-TEE-04',
+        'Áo Thun Nam Adidas Trefoil Original Cotton',
+        'Áo phông nam Adidas chất liệu 100% cotton hữu cơ mềm mại, in hình logo Trefoil Adidas phong cách đường phố.',
+        790000, 18, 650000, 100,
+        'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=600',
+        'áo, áo thun, áo phông, adidas, trefoil, streetwear, cotton, nam, ngắn tay',
+        'active'
+      ],
+      [
+        s1, stNike, brandMap['nike'], catMap['quan-ao-the-thao'], 'NIKE-HOODIE-FLEECE-05',
+        'Áo Hoodie Thể Thao Nike Club Fleece',
+        'Áo nỉ hoodie có nón trùm Nike lót bông ấm áp, chất vải thun nỉ bông mềm mại mùa thu đông.',
+        1490000, 13, 1290000, 45,
+        'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600',
+        'áo, áo hoodie, áo nỉ, nike, thu đông, áo ấm, có nón, streetwear, thể thao',
+        'active'
+      ],
+      [
+        s2, stAdidas, brandMap['adidas'], catMap['quan-ao-the-thao'], 'ADIDAS-TRACK-PANTS-06',
+        'Quần Thể Thao Nam Adidas Tiro Track Pants',
+        'Quần dài thể thao Adidas 3 sọc huyền thoại khóa kéo ống chân co giãn linh hoạt tập gym, đá bóng.',
+        1290000, 15, 1090000, 70,
+        'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=600',
+        'quần, quần thể thao, quần dài, adidas, 3 sọc, tiro, tập gym, đá bóng, nam',
+        'active'
+      ],
       [
         s1, stNike, brandMap['unbranded'], catMap['thoi-trang-nam'], 'TM-NAM-POLO-COTTON-001',
         'Áo Polo Nam Cotton Premium Cá Sấu',
@@ -530,11 +599,12 @@ async function runSeed() {
     ];
 
     for (const prod of rawProducts) {
+      const productParams = prod.length === 14 ? prod.slice(1) : prod;
       await connection.query(
-        `INSERT INTO products (seller_id, store_id, brand_id, category_id, sku, name, description,
+        `INSERT INTO products (store_id, brand_id, category_id, sku, name, description,
           original_price, discount_percent, price, stock, image_url, tags, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        prod
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        productParams
       );
     }
 

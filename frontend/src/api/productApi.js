@@ -23,8 +23,23 @@ const productApi = {
   getPopularTags: () => {
     return axiosClient.get('/products/tags/popular');
   },
+  getTagsByCategory: (categoryId) => {
+    return axiosClient.get('/products/tags/by-category', { params: { category_id: categoryId } });
+  },
+  predictCategory: (productName) => {
+    return axiosClient.get('/products/categories/suggest', { params: { name: productName } });
+  },
+  getSellerProducts: (params = {}) => {
+    return axiosClient.get('/products/seller/list', { params });
+  },
   createProduct: (productData) => {
     return axiosClient.post('/products', productData);
+  },
+  updateProduct: (id, productData) => {
+    return axiosClient.put(`/products/${id}`, productData);
+  },
+  deleteProduct: (id) => {
+    return axiosClient.delete(`/products/${id}`);
   },
 };
 

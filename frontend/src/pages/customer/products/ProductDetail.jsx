@@ -6,9 +6,10 @@ import { fetchSimilarProducts, trackUserInteraction } from '../../../store/slice
 import { addToCart } from '../../../store/slices/cartSlice';
 import useProductTracking from '../../../hooks/useProductTracking';
 import { Spin, Rate, Tag, Button, Breadcrumb } from 'antd';
-import { LoadingOutlined, ShoppingCartOutlined, HeartOutlined, HeartFilled, SafetyCertificateOutlined, SyncOutlined, CarOutlined, ThunderboltFilled, HomeOutlined } from '@ant-design/icons';
+import { LoadingOutlined, ShoppingCartOutlined, HeartOutlined, HeartFilled, SafetyCertificateOutlined, SyncOutlined, CarOutlined, ThunderboltFilled, HomeOutlined, ShopOutlined } from '@ant-design/icons';
 import StoreCardWidget from '../../../components/StoreCardWidget';
 import ProductCard from '../../../components/product/ProductCard';
+import AlertBanner from '../../../components/common/AlertBanner';
 import '../../../styles/product.css';
 
 export default function ProductDetail() {
@@ -73,6 +74,8 @@ export default function ProductDetail() {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
+  const productError = useAppSelector((state) => state.product.error);
+
   if (isLoading) {
     return (
       <div className="py-20 text-center">
@@ -83,11 +86,22 @@ export default function ProductDetail() {
 
   if (!product) {
     return (
-      <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-2xl text-center shadow-sm border border-gray-100">
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Không tìm thấy sản phẩm!</h2>
-        <Link to="/">
-          <Button type="primary" danger shape="round">Quay lại trang chủ</Button>
-        </Link>
+      <div className="max-w-lg mx-auto my-16 p-8 bg-white rounded-2xl text-center shadow-sm border border-gray-100 fade-in">
+        <AlertBanner
+          type="error"
+          title="Không tìm thấy sản phẩm"
+          message={productError || "Sản phẩm bạn truy vấn không tồn tại, đã bị gỡ hoặc có lỗi kết nối đến máy chủ."}
+        />
+        <div className="flex items-center justify-center gap-4 mt-6">
+          <Button type="primary" danger shape="round" onClick={() => dispatch(fetchProductById(id))}>
+            Thử tải lại
+          </Button>
+          <Link to="/">
+            <Button type="default" shape="round">
+              Quay lại trang chủ
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -123,6 +137,14 @@ export default function ProductDetail() {
         {/* Right: Detailed Info */}
         <div className="md:col-span-7 flex flex-col justify-between">
           <div>
+            {product.store_name && (
+              <div className="mb-2">
+                <Link to={`/store/${product.store_slug}`} className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-600 border border-orange-200 px-3 py-1 rounded-full text-xs font-bold hover:bg-orange-100 transition-colors">
+                  <ShopOutlined /> Gian Hàng Bán: {product.store_name} {product.store_is_official === 1 && '• Mall'}
+                </Link>
+              </div>
+            )}
+
             <h1 className="text-2xl font-bold text-gray-900 mb-3 leading-snug">
               {product.name}
             </h1>

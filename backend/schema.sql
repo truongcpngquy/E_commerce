@@ -27,6 +27,8 @@ DROP TABLE IF EXISTS stores;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS brands;
 DROP TABLE IF EXISTS user_contexts;
+DROP TABLE IF EXISTS user_roles;
+DROP TABLE IF EXISTS roles;
 DROP TABLE IF EXISTS user_profiles;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS user_interactions;
@@ -34,10 +36,18 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 
 -- =============================================================
--- MODULE 1: NGƯỜI DÙNG (USER PROFILING & CONTEXT)
+-- MODULE 1: NGƯỜI DÙNG (USER PROFILING, ROLES & CONTEXT)
 -- =============================================================
 
--- 1. Bảng Users (Tài khoản xác thực)
+-- 1. Bảng Roles (Danh mục Vai trò / Cấp quyền)
+CREATE TABLE IF NOT EXISTS roles (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(50) UNIQUE NOT NULL,
+    description   VARCHAR(255),
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- 2. Bảng Users (Tài khoản xác thực)
 CREATE TABLE IF NOT EXISTS users (
     id            INT AUTO_INCREMENT PRIMARY KEY,
     username      VARCHAR(100) UNIQUE NOT NULL,
@@ -49,6 +59,18 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_users_role (role),
     INDEX idx_users_status (status)
+) ENGINE=InnoDB;
+
+-- 3. Bảng Trung Gian User_Roles (Phân quyền Nhiều - Nhiều)
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_id       INT NOT NULL,
+    role_id       INT NOT NULL,
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+    INDEX idx_user_roles_user (user_id),
+    INDEX idx_user_roles_role (role_id)
 ) ENGINE=InnoDB;
 
 -- 2. Bảng User Profiles (Chân dung & Sở thích Khách hàng)
@@ -146,7 +168,6 @@ CREATE TABLE IF NOT EXISTS stores (
 -- 6. Bảng Products (Thông tin cốt lõi sản phẩm)
 CREATE TABLE IF NOT EXISTS products (
     id               INT AUTO_INCREMENT PRIMARY KEY,
-    seller_id        INT,
     store_id         INT,
     brand_id         INT,
     category_id      INT,
@@ -162,8 +183,7 @@ CREATE TABLE IF NOT EXISTS products (
     status           ENUM('draft', 'active', 'out_of_stock', 'archived') DEFAULT 'active',
     created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (seller_id)   REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (store_id)    REFERENCES stores(id) ON DELETE SET NULL,
+    FOREIGN KEY (store_id)    REFERENCES stores(id) ON DELETE CASCADE,
     FOREIGN KEY (brand_id)    REFERENCES brands(id) ON DELETE SET NULL,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
     INDEX idx_products_store (store_id),

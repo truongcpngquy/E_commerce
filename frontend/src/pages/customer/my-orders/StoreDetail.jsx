@@ -5,6 +5,7 @@ import { LoadingOutlined, SearchOutlined, ArrowLeftOutlined, ShopOutlined } from
 import storeApi from '../../../api/storeApi';
 import StoreHeroBanner from '../../../components/store/StoreHeroBanner';
 import ProductCard from '../../../components/product/ProductCard';
+import AlertBanner from '../../../components/common/AlertBanner';
 import '../../../styles/store.css';
 
 export default function StoreDetail() {
@@ -14,6 +15,7 @@ export default function StoreDetail() {
   const [products, setProducts] = useState([]);
   const [isLoadingStore, setIsLoadingStore] = useState(true);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [storeError, setStoreError] = useState(null);
 
   // States tìm kiếm nội bộ Shop, lọc & phân trang
   const [searchInStore, setSearchInStore] = useState('');
@@ -23,9 +25,13 @@ export default function StoreDetail() {
   // Tải thông tin Gian Hàng
   useEffect(() => {
     setIsLoadingStore(true);
+    setStoreError(null);
     storeApi.getStoreBySlug(slug)
       .then(res => setStore(res))
-      .catch(err => console.error('Lỗi tải thông tin Gian Hàng:', err))
+      .catch(err => {
+        console.error('Lỗi tải thông tin Gian Hàng:', err);
+        setStoreError(err.response?.data?.message || 'Gian hàng không tồn tại hoặc đã bị khóa.');
+      })
       .finally(() => setIsLoadingStore(false));
   }, [slug]);
 
@@ -75,14 +81,19 @@ export default function StoreDetail() {
 
   if (!store) {
     return (
-      <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-2xl text-center shadow-sm border border-gray-100">
-        <h2 className="text-xl font-bold text-gray-800 mb-2">❌ Không tìm thấy Gian Hàng</h2>
-        <p className="text-xs text-gray-500 mb-6">Gian hàng bạn truy cập không tồn tại hoặc đã tạm dừng hoạt động.</p>
-        <Link to="/">
-          <Button type="primary" danger icon={<ArrowLeftOutlined />} shape="round">
-            Quay lại trang chủ
-          </Button>
-        </Link>
+      <div className="max-w-lg mx-auto my-16 p-8 bg-white rounded-2xl text-center shadow-sm border border-gray-100 fade-in">
+        <AlertBanner
+          type="error"
+          title="Không tìm thấy Gian Hàng"
+          message={storeError || "Gian hàng bạn truy cập không tồn tại hoặc đã tạm dừng hoạt động."}
+        />
+        <div className="mt-6">
+          <Link to="/">
+            <Button type="primary" danger icon={<ArrowLeftOutlined />} shape="round">
+              Quay lại trang chủ
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }

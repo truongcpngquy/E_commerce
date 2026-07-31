@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../hooks/useReduxHooks';
 import { createOrder } from '../../../store/slices/orderSlice';
+import AlertBanner from '../../../components/common/AlertBanner';
 import './Checkout.css';
 
 export default function Checkout() {
@@ -9,21 +10,26 @@ export default function Checkout() {
   const dispatch = useAppDispatch();
   const [shippingAddress, setShippingAddress] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
   const navigate = useNavigate();
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
+    setErrorMessage(null);
+
     if (!shippingAddress.trim()) {
-      alert('Vui lòng nhập địa chỉ giao hàng!');
+      setErrorMessage('Vui lòng nhập đầy đủ địa chỉ giao hàng trước khi đặt hàng!');
       return;
     }
 
     setIsSubmitting(true);
-    const action = await dispatch(createOrder(shippingAddress));
+    const action = await dispatch(createOrder(shippingAddress.trim()));
     setIsSubmitting(false);
 
     if (createOrder.fulfilled.match(action)) {
       navigate('/orders');
+    } else {
+      setErrorMessage(action.payload || 'Không thể khởi tạo đơn hàng. Vui lòng thử lại sau!');
     }
   };
 
@@ -51,13 +57,25 @@ export default function Checkout() {
         <form onSubmit={handlePlaceOrder} className="checkout-delivery-card">
           <h3 className="card-section-title">Địa chỉ nhận hàng</h3>
 
+          {errorMessage && (
+            <AlertBanner
+              type="error"
+              title="Lỗi đặt hàng"
+              message={errorMessage}
+              onClose={() => setErrorMessage(null)}
+            />
+          )}
+
           <div className="input-group-textarea">
             <label htmlFor="address">Địa chỉ chi tiết (Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố)</label>
             <textarea
               id="address"
               rows="4"
               value={shippingAddress}
-              onChange={(e) => setShippingAddress(e.target.value)}
+              onChange={(e) => {
+                setShippingAddress(e.target.value);
+                if (errorMessage) setErrorMessage(null);
+              }}
               placeholder="Nhập địa chỉ giao hàng đầy đủ..."
               required
             ></textarea>

@@ -4,7 +4,20 @@ import { useAppDispatch, useAppSelector } from '../hooks/useReduxHooks';
 import { setSearchQuery } from '../store/slices/productSlice';
 import { logoutUser } from '../store/slices/authSlice';
 import { trackUserInteraction } from '../store/slices/recommendationSlice';
-import { ShoppingCart, Search, User, LogOut, LayoutDashboard, ClipboardList, Sparkles, Tag } from 'lucide-react';
+import {
+  ShoppingCart,
+  Search,
+  User,
+  LogOut,
+  LayoutDashboard,
+  ClipboardList,
+  Sparkles,
+  Tag,
+  Store,
+  ChevronDown,
+  ShieldCheck,
+  Building2
+} from 'lucide-react';
 import useDebounce from '../hooks/useDebounce';
 import productApi from '../api/productApi';
 import '../styles/header.css';
@@ -18,14 +31,17 @@ export default function Header() {
   const cartItems = useAppSelector((state) => state.cart.cartItems);
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
+  const isSeller = user && (user.role === 'seller' || (user.roles && user.roles.includes('seller')));
+
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const [keywordSuggestions, setKeywordSuggestions] = useState([]);
   const [matchedProducts, setMatchedProducts] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  
+
   const debouncedSearch = useDebounce(searchInput, 300);
   const suggestionRef = useRef(null);
+  const userDropdownRef = useRef(null);
 
   // Đồng bộ search input khi URL query thay đổi
   useEffect(() => {
@@ -34,6 +50,9 @@ export default function Header() {
     dispatch(setSearchQuery(urlSearch));
   }, [searchParams, dispatch]);
 
+  const [isFallbackSuggest, setIsFallbackSuggest] = useState(false);
+  const [suggestTokens, setSuggestTokens] = useState([]);
+
   // Gọi API Smart Auto-complete Suggest (/products/search/suggest?q=...) khi gõ
   useEffect(() => {
     if (debouncedSearch.trim().length >= 1) {
@@ -41,22 +60,31 @@ export default function Header() {
         .then((res) => {
           setKeywordSuggestions(res.suggestions || []);
           setMatchedProducts(res.products || []);
+          setIsFallbackSuggest(Boolean(res.isFallback));
+          setSuggestTokens(res.tokens || []);
         })
         .catch(() => {
           setKeywordSuggestions([]);
           setMatchedProducts([]);
+          setIsFallbackSuggest(false);
+          setSuggestTokens([]);
         });
     } else {
       setKeywordSuggestions([]);
       setMatchedProducts([]);
+      setIsFallbackSuggest(false);
+      setSuggestTokens([]);
     }
   }, [debouncedSearch]);
 
-  // Click ra ngoài để ẩn khung gợi ý
+  // Click ra ngoài để ẩn khung gợi ý & dropdown avatar
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (suggestionRef.current && !suggestionRef.current.contains(event.target)) {
         setShowSuggestions(false);
+      }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -82,7 +110,6 @@ export default function Header() {
 
   const handleProductSuggestionClick = (productId) => {
     setShowSuggestions(false);
-    // Ghi vết tương tác search_click (weight = 2) cho AI Engine
     dispatch(trackUserInteraction({ productId, type: 'search_click' }));
     navigate(`/product/${productId}`);
   };
@@ -94,6 +121,7 @@ export default function Header() {
   };
 
   const handleLogout = () => {
+    setShowDropdown(false);
     dispatch(logoutUser());
   };
 
@@ -130,7 +158,6 @@ export default function Header() {
           {/* Smart Live Suggestions Dropdown */}
           {showSuggestions && hasSuggestions && (
             <div className="search-suggestions-dropdown">
-              {/* Phần 1: Đề xuất từ khóa phổ biến */}
               {keywordSuggestions.length > 0 && (
                 <div className="suggestion-keywords-group">
                   <div className="suggestion-group-title">
@@ -152,10 +179,13 @@ export default function Header() {
                 </div>
               )}
 
-              {/* Phần 2: Đề xuất sản phẩm khớp trực tiếp */}
               {matchedProducts.length > 0 && (
                 <div className="suggestion-products-group">
-                  <div className="suggestion-group-title">Sản phẩm gợi ý khớp từ khóa:</div>
+                  <div className="suggestion-group-title">
+                    {isFallbackSuggest && suggestTokens.length > 0
+                      ? `🔍 Gợi ý theo từ khóa: #${suggestTokens.join(', #')}`
+                      : 'Sản phẩm gợi ý khớp từ khóa:'}
+                  </div>
                   {matchedProducts.map((item) => (
                     <div
                       key={item.id}
@@ -182,42 +212,109 @@ export default function Header() {
 
         {/* Action Buttons */}
         <div className="actions-section">
+          {/* Nút Kênh Người Bán Nổi Bật cho Tài khoản Seller */}
+          {isSeller && (
+            <Link to="/seller" className="seller-portal-header-btn">
+              <Store size={16} />
+              <span>Kênh Người Bán</span>
+            </Link>
+          )}
+
           <Link to="/cart" className="cart-icon-container">
             <ShoppingCart size={24} />
             {cartCount > 0 && <span className="cart-count-badge">{cartCount}</span>}
           </Link>
 
-          <div className="user-profile-section">
+          {/* USER AVATAR POPUP DROPDOWN MENU */}
+          <div className="user-profile-section" ref={userDropdownRef}>
             {user ? (
-              <div 
-                className="user-profile-info"
-                onClick={() => setShowDropdown(!showDropdown)}
-                onMouseLeave={() => setShowDropdown(false)}
-              >
-                <div className="avatar">
-                  {user.username.charAt(0).toUpperCase()}
-                </div>
-                <span className="username">{user.username}</span>
+              <div className="avatar-dropdown-wrapper">
+                <button
+                  type="button"
+                  className={`avatar-trigger-btn ${showDropdown ? 'active' : ''}`}
+                  onClick={() => setShowDropdown(!showDropdown)}
+                >
+                  <div className="avatar-circle">
+                    {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  <span className="username-label">{user.full_name || user.username}</span>
+                  <ChevronDown size={14} className={`chevron-icon ${showDropdown ? 'rotate' : ''}`} />
+                </button>
 
+                {/* FLOATING POPUP CARD DROPDOWN */}
                 {showDropdown && (
-                  <div className="user-dropdown">
-                    <Link to="/profile" className="dropdown-item">
-                      <User size={16} />
-                      Hồ sơ cá nhân
-                    </Link>
-                    <Link to="/orders" className="dropdown-item">
-                      <ClipboardList size={16} />
-                      Đơn mua của tôi
-                    </Link>
-                    {user.role === 'seller' && (
-                      <Link to="/seller" className="dropdown-item">
-                        <LayoutDashboard size={16} />
-                        Kênh người bán
+                  <div className="user-popup-menu fade-in-down">
+                    <div className="popup-arrow"></div>
+
+                    {/* POPUP HEADER USER INFO */}
+                    <div className="popup-user-header">
+                      <div className="popup-avatar">
+                        {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                      <div className="popup-user-details">
+                        <h4 className="popup-user-name">{user.full_name || user.username}</h4>
+                        <span className="popup-user-email">{user.email || `@${user.username}`}</span>
+                        <div className="popup-role-pill">
+                          {isSeller ? (
+                            <span className="role-tag seller flex items-center gap-1">
+                              <ShieldCheck size={12} /> Người Bán Pro
+                            </span>
+                          ) : (
+                            <span className="role-tag customer">🛒 Khách Hàng</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="popup-divider"></div>
+
+                    {/* MENU LIST ITEMS */}
+                    <div className="popup-menu-list">
+                      <Link
+                        to="/profile"
+                        className="popup-menu-item"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        <User size={16} className="menu-icon" />
+                        <span>Hồ Sơ Cá Nhân</span>
                       </Link>
-                    )}
-                    <button onClick={handleLogout} className="dropdown-item logout-btn">
+
+                      <Link
+                        to="/orders"
+                        className="popup-menu-item"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        <ClipboardList size={16} className="menu-icon" />
+                        <span>Đơn Mua Của Tôi</span>
+                      </Link>
+
+                      <Link
+                        to="/store"
+                        className="popup-menu-item"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        <Building2 size={16} className="menu-icon" />
+                        <span>Khám Phá Shopee Mall</span>
+                      </Link>
+
+                      {isSeller && (
+                        <Link
+                          to="/seller"
+                          className="popup-menu-item seller-highlight"
+                          onClick={() => setShowDropdown(false)}
+                        >
+                          <LayoutDashboard size={16} className="menu-icon text-orange-500" />
+                          <span>Kênh Người Bán Pro</span>
+                        </Link>
+                      )}
+                    </div>
+
+                    <div className="popup-divider"></div>
+
+                    {/* LOGOUT BUTTON */}
+                    <button onClick={handleLogout} className="popup-logout-btn">
                       <LogOut size={16} />
-                      Đăng xuất
+                      <span>Đăng Xuất Tài Khoản</span>
                     </button>
                   </div>
                 )}

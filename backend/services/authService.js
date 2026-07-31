@@ -42,6 +42,11 @@ class AuthService {
       );
       const userId = userResult.insertId;
 
+      // Tìm role_id trong bảng roles và chèn vào bảng trung gian user_roles
+      const [roleRows] = await connection.query('SELECT id FROM roles WHERE name = ?', [userRole]);
+      const roleId = roleRows.length > 0 ? roleRows[0].id : 1;
+      await connection.query('INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)', [userId, roleId]);
+
       // Insert profile mặc định vào user_profiles
       const displayName = full_name || username;
       await connection.query(
@@ -58,6 +63,7 @@ class AuthService {
           username,
           email,
           role: userRole,
+          roles: [userRole],
           full_name: displayName
         }
       };
@@ -80,11 +86,15 @@ class AuthService {
     }
 
     const [users] = await db.query(
-      `SELECT u.id, u.username, u.password, u.email, u.role, u.status,
-              up.full_name, up.gender, up.phone, up.avatar_url, up.city, up.preferred_categories, up.price_sensitivity
+      `SELECT u.id, u.username, u.password, u.email, u.role as primary_role, u.status,
+              up.full_name, up.gender, up.phone, up.avatar_url, up.city, up.preferred_categories, up.price_sensitivity,
+              GROUP_CONCAT(r.name) as user_roles_str
        FROM users u
        LEFT JOIN user_profiles up ON u.id = up.user_id
-       WHERE u.username = ? OR u.email = ?`,
+       LEFT JOIN user_roles ur ON u.id = ur.user_id
+       LEFT JOIN roles r ON ur.role_id = r.id
+       WHERE u.username = ? OR u.email = ?
+       GROUP BY u.id`,
       [username, username]
     );
 
@@ -109,8 +119,11 @@ class AuthService {
       throw err;
     }
 
+    const rolesList = user.user_roles_str ? user.user_roles_str.split(',') : [user.primary_role || 'customer'];
+    const activeRole = rolesList[0] || user.primary_role || 'customer';
+
     const token = jwt.sign(
-      { id: user.id, username: user.username, role: user.role },
+      { id: user.id, username: user.username, role: activeRole, roles: rolesList },
       process.env.JWT_SECRET || 'shopee_clone_secret_key_12345',
       { expiresIn: '7d' }
     );
@@ -130,7 +143,8 @@ class AuthService {
         id: user.id,
         username: user.username,
         email: user.email,
-        role: user.role,
+        role: activeRole,
+        roles: rolesList,
         full_name: user.full_name || user.username,
         avatar_url: user.avatar_url,
         city: user.city,
@@ -146,12 +160,16 @@ class AuthService {
    */
   async getUserById(userId) {
     const [users] = await db.query(
-      `SELECT u.id, u.username, u.email, u.role, u.status, u.created_at,
+      `SELECT u.id, u.username, u.email, u.role as primary_role, u.status, u.created_at,
               up.full_name, up.gender, up.date_of_birth, up.phone, up.avatar_url,
-              up.city, up.district, up.preferred_categories, up.price_sensitivity
+              up.city, up.district, up.preferred_categories, up.price_sensitivity,
+              GROUP_CONCAT(r.name) as user_roles_str
        FROM users u
        LEFT JOIN user_profiles up ON u.id = up.user_id
-       WHERE u.id = ?`,
+       LEFT JOIN user_roles ur ON u.id = ur.user_id
+       LEFT JOIN roles r ON ur.role_id = r.id
+       WHERE u.id = ?
+       GROUP BY u.id`,
       [userId]
     );
 
@@ -162,6 +180,9 @@ class AuthService {
     }
 
     const user = users[0];
+    const rolesList = user.user_roles_str ? user.user_roles_str.split(',') : [user.primary_role || 'customer'];
+    const activeRole = rolesList[0] || user.primary_role || 'customer';
+
     let prefCats = [];
     try {
       prefCats = typeof user.preferred_categories === 'string'
@@ -175,7 +196,8 @@ class AuthService {
       id: user.id,
       username: user.username,
       email: user.email,
-      role: user.role,
+      role: activeRole,
+      roles: rolesList,
       status: user.status,
       created_at: user.created_at,
       full_name: user.full_name || user.username,

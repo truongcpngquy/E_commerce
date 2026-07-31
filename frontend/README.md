@@ -21,7 +21,7 @@ If you are developing a production application, we recommend updating the config
 export default defineConfig([
   globalIgnores(['dist']),
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.{ts,jsx}'],
     extends: [
       // Other configs...
 
@@ -56,7 +56,7 @@ import reactDom from 'eslint-plugin-react-dom'
 export default defineConfig([
   globalIgnores(['dist']),
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.{ts,jsx}'],
     extends: [
       // Other configs...
       // Enable lint rules for React
@@ -93,7 +93,7 @@ npm install react-router-dom
 ```
 2. Import the necessary components from `react-router-dom` in your React application. For example:
 
-```tsx
+```jsx
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 ```
 
@@ -107,7 +107,7 @@ npm install @types/react-redux
 
 2. Import the necessary functions and components from `@reduxjs/toolkit` and `react-redux` in your React application. For example: (create store -> see below)
 
-```tsx
+```jsx
 import { configureStore } from '@reduxjs/toolkit';
 export const store = configureStore({
     reducer: {
@@ -121,13 +121,13 @@ export type AppDispatch = typeof store.dispatch;
 
 3. Create slice and add to store:
 
-```tsx
+```jsx
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 ```
 
 4. Create a slice for your state management. For example, let's create a simple counter slice:
 
-```tsx
+```jsx
 interface CounterState {
   value: number;
 }

@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../hooks/useReduxHooks';
-import { fetchProducts } from '../../../store/slices/productSlice';
-import { fetchPersonalizedRecommendations, fetchSearchBasedRecommendations, trackUserInteraction } from '../../../store/slices/recommendationSlice';
-import { addToCart } from '../../../store/slices/cartSlice';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Spin, Button, Tag, Segmented } from 'antd';
-import { ThunderboltFilled, FireFilled, LoadingOutlined, AppstoreOutlined, FilterOutlined } from '@ant-design/icons';
+import { fetchPersonalizedRecommendations, fetchSearchBasedRecommendations } from '../../../store/slices/recommendationSlice';
+import { useSearchParams } from 'react-router-dom';
+import { Spin, Button, Segmented, Tag } from 'antd';
+import { ThunderboltFilled, LoadingOutlined, AppstoreOutlined } from '@ant-design/icons';
 import productApi from '../../../api/productApi';
 import storeApi from '../../../api/storeApi';
 import ProductCard from '../../../components/product/ProductCard';
@@ -14,6 +12,7 @@ import CategoryNavSection from '../../../components/home/CategoryNavSection';
 import OfficialStoresSection from '../../../components/home/OfficialStoresSection';
 import TagCloudSection from '../../../components/home/TagCloudSection';
 import ZeroResultFallback from '../../../components/home/ZeroResultFallback';
+import AlertBanner from '../../../components/common/AlertBanner';
 import '../../../styles/home.css';
 
 export default function Home() {
@@ -37,11 +36,14 @@ export default function Home() {
   const [allProducts, setAllProducts] = useState([]);
   const [fallbackProducts, setFallbackProducts] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [productsError, setProductsError] = useState(null);
 
   // States Phân trang Backend & Infinite Scroll Lazy Loading
   const [page, setPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [paginationInfo, setPaginationInfo] = useState({ total: 0, page: 1, limit: 8, totalPages: 1, hasMore: false });
+  const [isFallbackSearch, setIsFallbackSearch] = useState(false);
+  const [searchTokens, setSearchTokens] = useState([]);
   const sentinelRef = useRef(null);
 
   // Tải danh sách thương hiệu chính hãng, thẻ Tags & Gian hàng Shopee Mall
@@ -62,6 +64,7 @@ export default function Home() {
     } else {
       setIsLoadingProducts(true);
     }
+    setProductsError(null);
 
     try {
       const res = await productApi.getProducts({
@@ -76,6 +79,8 @@ export default function Home() {
       const newProducts = res.products || [];
       setFallbackProducts(res.fallbackProducts || []);
       setPaginationInfo(res.pagination || { total: newProducts.length, page: targetPage, limit: 8, totalPages: 1, hasMore: false });
+      setIsFallbackSearch(Boolean(res.isFallback));
+      setSearchTokens(res.searchTokens || []);
 
       if (isReset || targetPage === 1) {
         setAllProducts(newProducts);
@@ -84,6 +89,7 @@ export default function Home() {
       }
     } catch (err) {
       console.error('Lỗi tải danh sách sản phẩm:', err);
+      setProductsError(err.response?.data?.message || 'Không thể kết nối đến hệ thống máy chủ để tải danh sách sản phẩm.');
     } finally {
       setIsLoadingProducts(false);
       setIsLoadingMore(false);
@@ -147,12 +153,14 @@ export default function Home() {
         <OfficialStoresSection officialStores={officialStores} />
       )}
 
-      {/* 4. KHỐI THẺ TAG THỊNH HÀNH */}
+      {/* 4. KHỐI THẺ TAG THỊNH HÀNH & THEO DANH MỤC */}
       {popularTags.length > 0 && (
         <TagCloudSection
           popularTags={popularTags}
           selectedTag={selectedTag}
           onSelectTag={setSelectedTag}
+          selectedCategory={selectedCategory}
+          categories={categories}
           totalProductsCount={allProducts.length}
         />
       )}
@@ -176,6 +184,19 @@ export default function Home() {
 
       {/* 6. DANH SÁCH SẢN PHẨM PHÂN TRANG & SẮP XẾP */}
       <section className="main-products-section">
+        {productsError && (
+          <AlertBanner
+            type="error"
+            title="Lỗi tải dữ liệu"
+            message={productsError}
+            action={
+              <Button type="primary" danger size="small" shape="round" onClick={() => loadProductsData(1, true)}>
+                Tải lại sản phẩm
+              </Button>
+            }
+          />
+        )}
+
         <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
           <h2 className="text-xl font-bold text-gray-800 m-0 flex items-center gap-2">
             <AppstoreOutlined className="text-orange-500" />
@@ -201,6 +222,24 @@ export default function Home() {
             />
           </div>
         </div>
+
+        {/* NLP Tokenized Search Banner */}
+        {searchQuery && isFallbackSearch && searchTokens && searchTokens.length > 0 && (
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-4 mb-6 border border-amber-200 shadow-sm flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <ThunderboltFilled className="text-amber-500 text-xl animate-pulse" />
+              <div className="text-xs text-gray-800">
+                <span className="font-bold text-gray-900 block text-sm mb-0.5">
+                  🔍 Tìm Kiếm Phân Tách Từ Khóa (NLP Token Engine)
+                </span>
+                Không tìm thấy cụm từ chính xác "<strong>{searchQuery}</strong>". Hệ thống đã tự động bóc tách từ dừng và tìm kiếm theo các từ khóa nổi bật: {' '}
+                {searchTokens.map(t => (
+                  <Tag key={t} color="volcano" className="font-bold text-xs rounded-full px-2.5 py-0.5">#{t}</Tag>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {isLoadingProducts ? (
           <div className="py-16 text-center">

@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../hooks/useReduxHooks';
 import { updateCartItem, removeFromCart } from '../../../store/slices/cartSlice';
 import { Trash2, ShoppingBag } from 'lucide-react';
+import ConfirmModal from '../../../components/common/ConfirmModal';
 import './Cart.css';
 
 export default function Cart() {
   const cart = useAppSelector((state) => state.cart.cartItems);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const [deletingProductId, setDeletingProductId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleQuantityChange = async (productId, currentQty, stock, change) => {
     const newQty = currentQty + change;
@@ -17,10 +21,12 @@ export default function Cart() {
     }
   };
 
-  const handleDeleteItem = async (productId) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')) {
-      await dispatch(removeFromCart(productId));
-    }
+  const handleConfirmDelete = async () => {
+    if (!deletingProductId) return;
+    setIsDeleting(true);
+    await dispatch(removeFromCart(deletingProductId));
+    setIsDeleting(false);
+    setDeletingProductId(null);
   };
 
   const formatPrice = (price) => {
@@ -99,7 +105,7 @@ export default function Cart() {
               {/* Nút xóa */}
               <div className="col-action">
                 <button 
-                  onClick={() => handleDeleteItem(item.product_id)}
+                  onClick={() => setDeletingProductId(item.product_id)}
                   className="delete-item-btn"
                   title="Xóa sản phẩm"
                 >
@@ -138,6 +144,19 @@ export default function Cart() {
           </button>
         </div>
       </div>
+
+      {/* Modal xác nhận xóa sản phẩm khỏi giỏ */}
+      <ConfirmModal
+        isOpen={Boolean(deletingProductId)}
+        title="Xóa sản phẩm khỏi giỏ hàng"
+        message="Bạn có chắc chắn muốn xóa sản phẩm này ra khỏi giỏ hàng của bạn không?"
+        confirmText="Xóa sản phẩm"
+        cancelText="Hủy bỏ"
+        confirmVariant="danger"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeletingProductId(null)}
+      />
     </div>
   );
 }

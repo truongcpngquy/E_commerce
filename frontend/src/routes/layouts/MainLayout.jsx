@@ -1,19 +1,38 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '../../components/Header';
-import { useAppSelector } from '../../hooks/useReduxHooks';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '../../hooks/useReduxHooks';
+import { removeToast } from '../../store/slices/uiSlice';
+import ErrorBoundary from '../../components/common/ErrorBoundary';
+import { CheckCircle2, AlertTriangle, Info, XCircle, X } from 'lucide-react';
 
 export default function MainLayout() {
+  const dispatch = useAppDispatch();
   const toasts = useAppSelector((state) => state.ui.toasts);
+
+  const getToastIcon = (type) => {
+    switch (type) {
+      case 'error':
+        return <XCircle size={20} className="toast-icon text-red-500" />;
+      case 'warning':
+        return <AlertTriangle size={20} className="toast-icon text-amber-500" />;
+      case 'info':
+        return <Info size={20} className="toast-icon text-blue-500" />;
+      case 'success':
+      default:
+        return <CheckCircle2 size={20} className="toast-icon text-emerald-500" />;
+    }
+  };
 
   return (
     <div className="app-layout">
       <Header />
       
-      {/* Main Content Area */}
+      {/* Main Content Area wrapped in ErrorBoundary */}
       <main className="main-content">
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
 
       {/* Footer */}
@@ -24,16 +43,20 @@ export default function MainLayout() {
         </div>
       </footer>
 
-      {/* Toast Notification Portal */}
+      {/* Enhanced Toast Notification Portal */}
       <div className="toast-container">
         {toasts.map((t) => (
-          <div key={t.id} className={`toast ${t.type}`}>
-            {t.type === 'error' ? (
-              <AlertTriangle size={18} color="#ff3333" />
-            ) : (
-              <CheckCircle size={18} color="#00bfa5" />
-            )}
-            <span>{t.message}</span>
+          <div key={t.id} className={`toast toast-${t.type || 'success'} fade-in`}>
+            {getToastIcon(t.type)}
+            <span className="toast-message">{t.message}</span>
+            <button
+              type="button"
+              className="toast-close-btn"
+              onClick={() => dispatch(removeToast(t.id))}
+              aria-label="Đóng"
+            >
+              <X size={14} />
+            </button>
           </div>
         ))}
       </div>

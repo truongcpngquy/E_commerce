@@ -11,9 +11,13 @@ export default function ProtectedRoute({ children, allowedRoles }) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (user && allowedRoles && !allowedRoles.includes(user.role)) {
-    dispatch(showToast('Bạn không có quyền truy cập trang này!', 'error'));
-    return <Navigate to="/" replace />;
+  if (user && allowedRoles) {
+    const userRoles = Array.isArray(user.roles) ? user.roles : [user.role];
+    const hasPermission = allowedRoles.some(r => userRoles.includes(r) || user.role === r);
+    if (!hasPermission) {
+      dispatch(showToast('Bạn không có quyền truy cập trang Kênh Người Bán này!', 'error'));
+      return <Navigate to="/" replace />;
+    }
   }
 
   return children;

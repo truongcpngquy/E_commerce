@@ -47,6 +47,16 @@ exports.getPopularTags = async (req, res) => {
   }
 };
 
+exports.getTagsByCategory = async (req, res) => {
+  try {
+    const categoryId = req.query.category_id;
+    const tags = await productService.getTagsByCategory(categoryId);
+    res.json(tags);
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi server khi lấy thẻ tags theo danh mục!', error: err.message });
+  }
+};
+
 exports.searchSuggest = async (req, res) => {
   try {
     const suggestions = await productService.searchSuggest(req.query.q);
@@ -73,5 +83,43 @@ exports.createProduct = async (req, res) => {
   } catch (err) {
     const status = err.statusCode || 500;
     res.status(status).json({ message: err.message || 'Lỗi server khi thêm sản phẩm!' });
+  }
+};
+
+exports.predictCategory = async (req, res) => {
+  try {
+    const result = await productService.predictCategoryByName(req.query.name);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi AI gợi ý danh mục!', error: err.message });
+  }
+};
+
+exports.getSellerProducts = async (req, res) => {
+  try {
+    const result = await productService.getSellerProducts(req.user.id, req.query);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi lấy danh sách sản phẩm Người bán!', error: err.message });
+  }
+};
+
+exports.updateProduct = async (req, res) => {
+  try {
+    const result = await productService.updateProduct(req.user.id, req.params.id, req.body);
+    res.json(result);
+  } catch (err) {
+    const status = err.statusCode || 500;
+    res.status(status).json({ message: err.message || 'Lỗi cập nhật sản phẩm!' });
+  }
+};
+
+exports.deleteProduct = async (req, res) => {
+  try {
+    const result = await productService.deleteProduct(req.user.id, req.params.id);
+    res.json(result);
+  } catch (err) {
+    const status = err.statusCode || 500;
+    res.status(status).json({ message: err.message || 'Lỗi xóa sản phẩm!' });
   }
 };
