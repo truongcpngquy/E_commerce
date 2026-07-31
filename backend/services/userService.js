@@ -1,25 +1,19 @@
 const db = require('../config/db');
+const userRepository = require('../repositories/userRepository');
 
 class UserService {
   /**
    * Lấy thông tin Profile của người dùng
    */
   async getProfile(userId) {
-    const [profiles] = await db.query(
-      `SELECT up.*, u.username, u.email, u.role
-       FROM user_profiles up
-       JOIN users u ON up.user_id = u.id
-       WHERE up.user_id = ?`,
-      [userId]
-    );
+    const profile = await userRepository.findUserProfile(userId);
 
-    if (profiles.length === 0) {
+    if (!profile) {
       const err = new Error('Không tìm thấy profile!');
       err.statusCode = 404;
       throw err;
     }
 
-    const profile = profiles[0];
     try {
       profile.preferred_categories = typeof profile.preferred_categories === 'string'
         ? JSON.parse(profile.preferred_categories)

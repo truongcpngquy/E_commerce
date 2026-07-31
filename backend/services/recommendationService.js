@@ -1,5 +1,7 @@
 const db = require('../config/db');
 const recoEngine = require('../utils/recommendationEngine');
+const userRepository = require('../repositories/userRepository');
+const productRepository = require('../repositories/productRepository');
 
 const ACTION_WEIGHTS = {
   search_click:    2,
@@ -42,23 +44,7 @@ class RecommendationService {
     const weight = ACTION_WEIGHTS[rawAction] || ACTION_WEIGHTS[finalAction] || 1;
     const sessId = session_id || `sess_${Date.now()}`;
 
-    if (userId) {
-      await db.query(
-        `INSERT INTO user_behavior_logs (user_id, session_id, product_id, action_type, weight, dwell_seconds)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [userId, sessId, product_id, finalAction, weight, dwell_seconds]
-      );
-    }
-
-    // Cập nhật metrics ngầm
-    db.query(
-      `INSERT INTO product_metrics (product_id, views_count, popularity_score)
-       VALUES (?, 1, ?)
-       ON DUPLICATE KEY UPDATE
-         views_count = views_count + IF(? = 'product_view', 1, 0),
-         popularity_score = popularity_score + ?`,
-      [product_id, weight, finalAction, weight]
-    ).catch(e => console.error('Lỗi cập nhật metrics:', e.message));
+    await userRepository.insertBehaviorLog(userId, sessId, product_id, finalAction, weight, dwell_seconds);
 
     return { success: true, message: 'Đã ghi nhận vết tương tác thành công!' };
   }
@@ -67,24 +53,8 @@ class RecommendationService {
    * Gợi ý sản phẩm cá nhân hóa cho User (Personalized AI Feed)
    */
   async getPersonalizedRecommendations(userId, limit = 6) {
-    const [allProducts] = await db.query(
-      `SELECT p.*, c.name as category_name, b.name as brand_name,
-              pm.rating_avg, pm.rating_count, pm.popularity_score
-       FROM products p
-       LEFT JOIN categories c ON p.category_id = c.id
-       LEFT JOIN brands b ON p.brand_id = b.id
-       LEFT JOIN product_metrics pm ON p.id = pm.product_id
-       WHERE p.status = 'active'`
-    );
-
-    const [behaviorLogs] = await db.query(
-      `SELECT product_id, weight, created_at
-       FROM user_behavior_logs
-       WHERE user_id = ?
-       ORDER BY created_at DESC
-       LIMIT 50`,
-      [userId]
-    );
+    const allProducts = await productRepository.findProducts("WHERE p.status = 'active'", []);
+    const behaviorLogs = await userRepository.findUserBehaviorLogs(userId, 50);
 
     return recoEngine.getPersonalizedRecommendations(
       behaviorLogs,
@@ -97,15 +67,7 @@ class RecommendationService {
    * Gợi ý sản phẩm tương tự dựa trên Cosine Similarity (Similar Products)
    */
   async getSimilarProducts(productId, limit = 5) {
-    const [allProducts] = await db.query(
-      `SELECT p.*, c.name as category_name, b.name as brand_name,
-              pm.rating_avg, pm.rating_count, pm.popularity_score
-       FROM products p
-       LEFT JOIN categories c ON p.category_id = c.id
-       LEFT JOIN brands b ON p.brand_id = b.id
-       LEFT JOIN product_metrics pm ON p.id = pm.product_id
-       WHERE p.status = 'active'`
-    );
+    const allProducts = await productRepository.findProducts("WHERE p.status = 'active'", []);
 
     return recoEngine.getSimilarProducts(
       Number(productId),
@@ -118,19 +80,7 @@ class RecommendationService {
    * Lấy sản phẩm xu hướng / nổi bật (Trending Products)
    */
   async getTrendingProducts(limit = 10) {
-    const [products] = await db.query(
-      `SELECT p.*, c.name as category_name, b.name as brand_name,
-              pm.rating_avg, pm.rating_count, pm.popularity_score
-       FROM products p
-       LEFT JOIN categories c ON p.category_id = c.id
-       LEFT JOIN brands b ON p.brand_id = b.id
-       LEFT JOIN product_metrics pm ON p.id = pm.product_id
-       WHERE p.status = 'active'
-       ORDER BY pm.popularity_score DESC, p.id DESC
-       LIMIT ?`,
-      [limit]
-    );
-    return products;
+    return productRepository.findProducts("WHERE p.status = 'active' ORDER BY pm.popularity_score DESC, p.id DESC LIMIT ?", [limit]);
   }
 
   /**
@@ -153,15 +103,7 @@ class RecommendationService {
     const searchKeywords = searchLogs.map(l => l.query_text).join(' ');
     const tokens = recoEngine.tokenize(searchKeywords);
 
-    const [allProducts] = await db.query(
-      `SELECT p.*, c.name as category_name, b.name as brand_name,
-              pm.rating_avg, pm.rating_count, pm.popularity_score
-       FROM products p
-       LEFT JOIN categories c ON p.category_id = c.id
-       LEFT JOIN brands b ON p.brand_id = b.id
-       LEFT JOIN product_metrics pm ON p.id = pm.product_id
-       WHERE p.status = 'active'`
-    );
+    const allProducts = await productRepository.findProducts("WHERE p.status = 'active'", []);
 
     const scoredProducts = allProducts.map(p => {
       const content = `${p.name} ${p.description || ''} ${p.tags || ''} ${p.category_name || ''}`.toLowerCase();
