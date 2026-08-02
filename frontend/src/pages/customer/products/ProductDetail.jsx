@@ -16,6 +16,7 @@ export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { token } = useAppSelector((state) => state.auth);
 
   const product = useAppSelector((state) => state.product.selectedProduct);
   const similarProducts = useAppSelector((state) => state.recommendation.similarList);
@@ -51,11 +52,19 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!product) return;
+    if (!token) {
+      navigate('/auth');
+      return;
+    }
     dispatch(addToCart({ productId: product.id, quantity }));
   };
 
   const handleBuyNow = async () => {
     if (!product) return;
+    if (!token) {
+      navigate('/auth');
+      return;
+    }
     const action = await dispatch(addToCart({ productId: product.id, quantity }));
     if (addToCart.fulfilled.match(action)) {
       navigate('/cart');

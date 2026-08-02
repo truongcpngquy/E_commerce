@@ -1,19 +1,25 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, Rate, Tag, Button, Tooltip, Badge } from 'antd';
 import { ShoppingCartOutlined, HeartOutlined, ShopOutlined, CheckCircleFilled } from '@ant-design/icons';
-import { useAppDispatch } from '../../hooks/useReduxHooks';
+import { useAppDispatch, useAppSelector } from '../../hooks/useReduxHooks';
 import { addToCart } from '../../store/slices/cartSlice';
 import { trackUserInteraction } from '../../store/slices/recommendationSlice';
 
 export default function ProductCard({ product }) {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { token } = useAppSelector((state) => state.auth);
 
   if (!product) return null;
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!token) {
+      navigate('/auth');
+      return;
+    }
     dispatch(addToCart({ productId: product.id, quantity: 1 }));
   };
 
