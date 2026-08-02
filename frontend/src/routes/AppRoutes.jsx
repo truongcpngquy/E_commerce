@@ -15,6 +15,7 @@ import SellerDashboard from '../pages/seller/SellerDashboard';
 import StoreDetail from '../pages/customer/my-orders/StoreDetail';
 import StoresList from '../pages/customer/stores/StoresList';
 import Profile from '../pages/customer/profile/Profile';
+import AdminDashboard from '../pages/admin/AdminDashboard';
 
 export default function AppRoutes() {
   const [sellerActiveTab, setSellerActiveTab] = useState('overview');
@@ -97,6 +98,13 @@ export default function AppRoutes() {
           />
         } />
       </Route>
+
+      {/* Admin Portal Route */}
+      <Route path="/admin" element={
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminDashboard />
+        </ProtectedRoute>
+      } />
     </Routes>
   );
 }

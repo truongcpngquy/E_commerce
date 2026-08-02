@@ -12,6 +12,7 @@ const wishlistRoutes = require('./routes/wishlistRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
 const storeRoutes = require('./routes/storeRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -31,6 +32,7 @@ const apiRouters = [
   { path: '/reviews', router: reviewRoutes },
   { path: '/seller', router: sellerRoutes },
   { path: '/stores', router: storeRoutes },
+  { path: '/admin', router: adminRoutes },
 ];
 
 apiRouters.forEach(({ path, router }) => {

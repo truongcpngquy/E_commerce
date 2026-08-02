@@ -479,3 +479,50 @@
   align-items: center;
   gap: 6px;
 }
+
+/* ========================================================== */
+/* ADMIN STYLES IN HEADER & POPUP */
+/* ========================================================== */
+.admin-portal-header-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(99, 102, 241, 0.25);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(165, 180, 252, 0.4);
+  transition: all 0.2s ease-in-out;
+  backdrop-filter: blur(4px);
+  text-decoration: none;
+}
+
+.admin-portal-header-btn:hover {
+  background: #ffffff;
+  color: #4f46e5;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  border-color: #818cf8;
+}
+
+.role-tag.admin {
+  background: #e0e7ff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+}
+
+.popup-menu-item.admin-highlight {
+  background: #f5f3ff;
+  color: #6d28d9;
+  font-weight: 700;
+}
+
+.popup-menu-item.admin-highlight:hover {
+  background: #6366f1;
+  color: #ffffff;
+}
+
+.popup-menu-item.admin-highlight:hover .menu-icon {
+  color: #ffffff !important;
+}
