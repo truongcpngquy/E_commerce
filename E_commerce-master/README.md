@@ -30,6 +30,14 @@
 - **Hiệu năng (Performance)**: Giao diện tối ưu nhẹ nhàng, kết nối CSDL sử dụng connection pool.
 - **UI/UX**: Giao diện Responsive (tương thích đa thiết bị) viết bằng Vanilla CSS với hiệu ứng mượt mà.
 
+### 3. Hệ thống Khuyến nghị Thông minh (AI Recommendation Engine)
+Dự án tích hợp hệ thống AI lai (Hybrid Recommendation) kết hợp giữa hai thuật toán cốt lõi để cá nhân hóa trải nghiệm:
+- **Content-Based Filtering (CBF)**: Sử dụng TF-IDF và Cosine Similarity để phân tích thuộc tính văn bản của sản phẩm (tên, mô tả, tags). Giúp gợi ý các "Sản phẩm tương tự" (Similar Products) ngay tại trang chi tiết.
+- **Item-based Collaborative Filtering (CF)**: Xây dựng ma trận Item-User và tính toán khoảng cách tương đồng giữa các sản phẩm dựa trên hành vi của đám đông.
+- **Theo vết Hành vi (Implicit Feedback)**: Ghi nhận mọi tương tác của người dùng với các trọng số (Weights) khác nhau: Mua hàng (5 điểm), Thêm giỏ/Checkout (4 điểm), Thích (3 điểm), Tìm kiếm (2 điểm), Xem (1 điểm)... để đo lường độ quan tâm chính xác.
+- **Thuật toán Lai (Hybrid Scoring)**: Điểm gợi ý cá nhân hóa (Personalized Recommendations) trên trang chủ là kết quả kết hợp (50% CBF + 50% CF), giúp khắc phục nhược điểm "Cold Start" của hệ thống truyền thống.
+- **Gợi ý theo Ngữ cảnh (Contextual)**: Hỗ trợ gợi ý dựa trên từ khóa tìm kiếm gần đây hoặc tự động fallback về các sản phẩm Thịnh hành (Trending) nếu người dùng hoàn toàn mới.
+
 ---
 
 ## 📦 Cấu trúc Thư mục
