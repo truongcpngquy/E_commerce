@@ -13,6 +13,25 @@
 
 ---
 
+## 📋 Đặc tả dự án (Project Specifications)
+
+### 1. Yêu cầu chức năng (Functional Requirements)
+- **Hệ thống Người dùng (User Roles)**: 
+  - *Khách hàng (Customer)*: Đăng ký/Đăng nhập, duyệt danh mục, tìm kiếm, xem chi tiết sản phẩm, quản lý giỏ hàng, đặt hàng, quản lý đơn hàng, nhận gợi ý sản phẩm cá nhân hóa.
+  - *Người bán (Seller)*: Quản lý kênh người bán, đăng bán sản phẩm mới, cập nhật thông tin sản phẩm, xử lý đơn hàng của shop, gắn tags cho sản phẩm.
+  - *Quản trị viên (Admin)*: Quản lý người dùng, cửa hàng và giám sát hoạt động hệ thống.
+- **Tính năng Cốt lõi (Core Features)**:
+  - Giỏ hàng & Đặt hàng (Cart & Checkout): Thêm/xóa sản phẩm, tính tổng tiền, đặt hàng.
+  - Hệ thống Gợi ý (Recommendation Engine): Đề xuất sản phẩm tương tự khi xem chi tiết (Similar Products) và đề xuất cá nhân hóa trên trang chủ (Personalized) dựa trên lịch sử tương tác (view, like, cart, buy).
+- **Cơ sở dữ liệu (Database)**: Thiết kế chuẩn hóa (Normalization) tối ưu các bảng Users, Stores, Products, Orders, OrderItems, UserInteractions...
+
+### 2. Yêu cầu phi chức năng (Non-Functional Requirements)
+- **Bảo mật (Security)**: Mã hóa mật khẩu bằng Bcrypt, xác thực bằng JWT, chống SQL Injection thông qua query tham số hóa.
+- **Hiệu năng (Performance)**: Giao diện tối ưu nhẹ nhàng, kết nối CSDL sử dụng connection pool.
+- **UI/UX**: Giao diện Responsive (tương thích đa thiết bị) viết bằng Vanilla CSS với hiệu ứng mượt mà.
+
+---
+
 ## 📦 Cấu trúc Thư mục
 
 ```text
