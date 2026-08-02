@@ -1,0 +1,725 @@
+/* Admin Dashboard CSS Stylesheet */
+
+:root {
+  --admin-sidebar-bg: #1e293b;
+  --admin-sidebar-text: #94a3b8;
+  --admin-sidebar-hover: #334155;
+  --admin-sidebar-active: #6366f1;
+  --admin-main-bg: #f8fafc;
+  --admin-card-bg: #ffffff;
+  --admin-text-primary: #0f172a;
+  --admin-text-secondary: #475569;
+  --admin-border-color: #e2e8f0;
+  --admin-indigo: #6366f1;
+  --admin-emerald: #10b981;
+  --admin-rose: #f43f5e;
+  --admin-amber: #f59e0b;
+}
+
+.admin-dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  margin: -20px; /* Offset the main layout padding */
+  background-color: var(--admin-main-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* 1. Sidebar Styles */
+.admin-sidebar {
+  width: 260px;
+  background-color: var(--admin-sidebar-bg);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.sidebar-brand {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.brand-icon {
+  color: var(--admin-indigo);
+}
+
+.sidebar-brand h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.sidebar-brand span {
+  font-size: 11px;
+  color: var(--admin-sidebar-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-nav {
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: var(--admin-sidebar-text);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+}
+
+.nav-item:hover {
+  background-color: var(--admin-sidebar-hover);
+  color: #ffffff;
+}
+
+.nav-item.active {
+  background-color: var(--admin-sidebar-active);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+}
+
+/* 2. Main Content Layout */
+.admin-main {
+  flex: 1;
+  padding: 24px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-x: hidden;
+}
+
+.admin-top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--admin-border-color);
+}
+
+.header-title h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--admin-text-primary);
+  margin: 0;
+}
+
+.header-title p {
+  font-size: 14px;
+  color: var(--admin-text-secondary);
+  margin: 4px 0 0 0;
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #ffffff;
+  border: 1px solid var(--admin-border-color);
+  color: var(--admin-text-secondary);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* 3. Loading Spinner */
+.admin-loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  gap: 16px;
+}
+
+.admin-loading-spinner p {
+  font-size: 14px;
+  color: var(--admin-text-secondary);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 4. Overview Statistics */
+.stats-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border-color);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.stat-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bg-emerald-100 { background-color: #d1fae5; }
+.text-emerald-600 { color: #059669; }
+.bg-indigo-100 { background-color: #e0e7ff; }
+.text-indigo-600 { color: #4f46e5; }
+.bg-amber-100 { background-color: #fef3c7; }
+.text-amber-600 { color: #d97706; }
+.bg-rose-100 { background-color: #ffe4e6; }
+.text-rose-600 { color: #e11d48; }
+
+.card-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--admin-text-secondary);
+}
+
+.card-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--admin-text-primary);
+  margin-top: 4px;
+}
+
+.card-trend {
+  font-size: 12px;
+  color: var(--admin-emerald);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+.card-sub-stats {
+  display: flex;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--admin-text-secondary);
+}
+
+/* Overview Details Grid Layout */
+.overview-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.overview-card {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border-color);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.overview-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--admin-text-primary);
+  margin: 0 0 16px 0;
+}
+
+/* Order Distribution Bars */
+.status-bars-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.status-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-bar-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--admin-text-secondary);
+}
+
+.status-bar-track {
+  height: 8px;
+  background-color: #f1f5f9;
+  border-radius: 99px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.status-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.8s ease-out;
+}
+
+.fill-pending { background-color: var(--admin-amber); }
+.fill-confirmed { background-color: var(--admin-indigo); }
+.fill-processing { background-color: #3b82f6; }
+.fill-shipping { background-color: #06b6d4; }
+.fill-completed { background-color: var(--admin-emerald); }
+.fill-cancelled { background-color: var(--admin-rose); }
+.fill-refunded { background-color: #94a3b8; }
+
+.no-data-text {
+  text-align: center;
+  color: var(--admin-sidebar-text);
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+/* Recent Orders Section */
+.card-title-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.card-title-action h3 {
+  margin: 0;
+}
+
+.view-all-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-indigo);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+.recent-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recent-order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #f1f5f9;
+  transition: transform 0.2s ease;
+}
+
+.recent-order-item:hover {
+  transform: translateX(4px);
+}
+
+.order-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-id {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--admin-text-primary);
+}
+
+.order-customer {
+  font-size: 12px;
+  color: var(--admin-text-secondary);
+}
+
+.order-meta-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.order-amount {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text-primary);
+}
+
+/* 5. General Admin Card & Table Controls */
+.admin-card {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border-color);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f1f5f9;
+  border: 1px solid var(--admin-border-color);
+  padding: 8px 14px;
+  border-radius: 8px;
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 13px;
+  outline: none;
+  color: var(--admin-text-primary);
+}
+
+.filter-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--admin-text-secondary);
+}
+
+.filter-select select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border-color);
+  font-size: 13px;
+  background-color: #ffffff;
+  outline: none;
+  color: var(--admin-text-primary);
+  min-width: 150px;
+}
+
+/* 6. Admin Tables Styling */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.admin-table th {
+  padding: 14px 16px;
+  background-color: #f8fafc;
+  color: var(--admin-text-secondary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--admin-border-color);
+  font-size: 13px;
+}
+
+.admin-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--admin-border-color);
+  color: var(--admin-text-primary);
+  vertical-align: middle;
+}
+
+.admin-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.row-muted {
+  background-color: #f8fafc;
+  opacity: 0.7;
+}
+
+.row-muted td {
+  color: var(--admin-sidebar-text);
+}
+
+/* Sub-cell items styling */
+.user-info-cell, .user-contact-cell, .store-info-cell, .owner-info-cell, .customer-info-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cell-username {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.cell-fullname, .cell-phone, .owner-email, .cell-sub {
+  font-size: 12px;
+  color: var(--admin-text-secondary);
+}
+
+.store-info-cell {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.store-avatar-mini {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--admin-border-color);
+}
+
+.store-name-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.cell-store-name {
+  font-weight: 600;
+}
+
+.mall-badge {
+  background-color: #ee4d2d;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  width: fit-content;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.table-product-image {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border-color);
+}
+
+.truncate-cell {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 7. Action Badges & Buttons */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge-active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-suspended {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.payment-method-tag {
+  background-color: #f1f5f9;
+  color: var(--admin-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Status Pill */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-completed { background-color: #d1fae5; color: #065f46; }
+.status-cancelled { background-color: #fee2e2; color: #991b1b; }
+.status-refunded { background-color: #f1f5f9; color: #475569; }
+.status-shipping { background-color: #e0f2fe; color: #0369a1; }
+.status-processing { background-color: #dbeafe; color: #1e40af; }
+.status-pending { background-color: #fef3c7; color: #92400e; }
+
+/* Select selectors */
+.role-selector, .order-status-selector {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--admin-border-color);
+  background-color: #ffffff;
+  font-size: 13px;
+  color: var(--admin-text-primary);
+  outline: none;
+  font-weight: 500;
+}
+
+.role-selector:focus, .order-status-selector:focus {
+  border-color: var(--admin-indigo);
+}
+
+/* Action Icon Buttons */
+.action-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--admin-border-color);
+  background-color: #ffffff;
+  color: var(--admin-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-disabled {
+  font-size: 11px;
+  color: var(--admin-sidebar-text);
+  font-weight: 500;
+  background-color: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.btn-suspend:hover {
+  background-color: #fee2e2;
+  color: var(--admin-rose);
+  border-color: #fca5a5;
+}
+
+.btn-activate:hover {
+  background-color: #d1fae5;
+  color: var(--admin-emerald);
+  border-color: #6ee7b7;
+}
+
+.btn-delete:hover {
+  background-color: #fee2e2;
+  color: var(--admin-rose);
+  border-color: #fca5a5;
+}
+
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.text-nowrap { white-space: nowrap; }
+.no-results {
+  padding: 40px !important;
+  color: var(--admin-sidebar-text);
+}
+.text-capitalize { text-transform: capitalize; }
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .overview-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-dashboard-container {
+    flex-direction: column;
+  }
+  .admin-sidebar {
+    width: 100%;
+  }
+  .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .nav-item {
+    width: auto;
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+  }
+}

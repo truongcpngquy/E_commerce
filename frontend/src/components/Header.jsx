@@ -32,6 +32,7 @@ export default function Header() {
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const isSeller = user && (user.role === 'seller' || (user.roles && user.roles.includes('seller')));
+  const isAdmin = user && (user.role === 'admin' || (user.roles && user.roles.includes('admin')));
 
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const [keywordSuggestions, setKeywordSuggestions] = useState([]);
@@ -220,6 +221,14 @@ export default function Header() {
             </Link>
           )}
 
+          {/* Nút Kênh Quản Trị nổi bật cho Tài khoản Admin */}
+          {isAdmin && (
+            <Link to="/admin" className="admin-portal-header-btn">
+              <ShieldCheck size={16} />
+              <span>Kênh Quản Trị</span>
+            </Link>
+          )}
+
           <Link to="/cart" className="cart-icon-container">
             <ShoppingCart size={24} />
             {cartCount > 0 && <span className="cart-count-badge">{cartCount}</span>}
@@ -255,7 +264,11 @@ export default function Header() {
                         <h4 className="popup-user-name">{user.full_name || user.username}</h4>
                         <span className="popup-user-email">{user.email || `@${user.username}`}</span>
                         <div className="popup-role-pill">
-                          {isSeller ? (
+                          {isAdmin ? (
+                            <span className="role-tag admin flex items-center gap-1">
+                              <ShieldCheck size={12} /> Quản Trị Viên
+                            </span>
+                          ) : isSeller ? (
                             <span className="role-tag seller flex items-center gap-1">
                               <ShieldCheck size={12} /> Người Bán Pro
                             </span>
@@ -305,6 +318,17 @@ export default function Header() {
                         >
                           <LayoutDashboard size={16} className="menu-icon text-orange-500" />
                           <span>Kênh Người Bán Pro</span>
+                        </Link>
+                      )}
+
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          className="popup-menu-item admin-highlight"
+                          onClick={() => setShowDropdown(false)}
+                        >
+                          <ShieldCheck size={16} className="menu-icon text-indigo-500" />
+                          <span>Kênh Quản Trị Admin</span>
                         </Link>
                       )}
                     </div>
