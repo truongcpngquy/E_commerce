@@ -31,12 +31,37 @@
 - **UI/UX**: Giao diện Responsive (tương thích đa thiết bị) viết bằng Vanilla CSS với hiệu ứng mượt mà.
 
 ### 3. Hệ thống Khuyến nghị Thông minh (AI Recommendation Engine)
-Dự án tích hợp hệ thống AI lai (Hybrid Recommendation) kết hợp giữa hai thuật toán cốt lõi để cá nhân hóa trải nghiệm:
-- **Content-Based Filtering (CBF)**: Sử dụng TF-IDF và Cosine Similarity để phân tích thuộc tính văn bản của sản phẩm (tên, mô tả, tags). Giúp gợi ý các "Sản phẩm tương tự" (Similar Products) ngay tại trang chi tiết.
-- **Item-based Collaborative Filtering (CF)**: Xây dựng ma trận Item-User và tính toán khoảng cách tương đồng giữa các sản phẩm dựa trên hành vi của đám đông.
-- **Theo vết Hành vi (Implicit Feedback)**: Ghi nhận mọi tương tác của người dùng với các trọng số (Weights) khác nhau: Mua hàng (5 điểm), Thêm giỏ/Checkout (4 điểm), Thích (3 điểm), Tìm kiếm (2 điểm), Xem (1 điểm)... để đo lường độ quan tâm chính xác.
-- **Thuật toán Lai (Hybrid Scoring)**: Điểm gợi ý cá nhân hóa (Personalized Recommendations) trên trang chủ là kết quả kết hợp (50% CBF + 50% CF), giúp khắc phục nhược điểm "Cold Start" của hệ thống truyền thống.
-- **Gợi ý theo Ngữ cảnh (Contextual)**: Hỗ trợ gợi ý dựa trên từ khóa tìm kiếm gần đây hoặc tự động fallback về các sản phẩm Thịnh hành (Trending) nếu người dùng hoàn toàn mới.
+Dự án được tích hợp một hệ thống Trí tuệ Nhân tạo (AI) chuyên sâu về phân tích dữ liệu và gợi ý sản phẩm lai (Hybrid Recommendation System). Hệ thống này hoạt động theo thời gian thực (Real-time) và kết hợp tinh hoa của nhiều mô hình tính toán để tối ưu hóa tỷ lệ chuyển đổi (Conversion Rate) và trải nghiệm người dùng (UX):
+
+#### A. Kiến trúc Thuật toán (Algorithm Architecture)
+1. **Content-Based Filtering (CBF - Lọc theo nội dung)**:
+   - **Xử lý Ngôn ngữ Tự nhiên (NLP)**: Hệ thống sử dụng bộ Tokenizer tự xây dựng kết hợp danh sách từ dừng (Stop-words) của tiếng Việt và tiếng Anh để lọc sạch nhiễu.
+   - **Mô hình Hóa Văn bản (Text Vectorization)**: Áp dụng thuật toán **TF-IDF (Term Frequency-Inverse Document Frequency)** để phân tích tổng hợp các trường dữ liệu: Tên sản phẩm, Mô tả chi tiết, Tags từ khóa và Danh mục. Thuật toán này giúp xác định các từ khóa đặc trưng nhất của mỗi sản phẩm.
+   - **Đo lường Khoảng cách (Cosine Similarity)**: Tính toán góc giữa các vector TF-IDF của sản phẩm để tìm ra mức độ tương đồng (0 đến 1).
+   - **Category Synergy Multiplier**: Tích hợp cơ chế nhân hệ số tương đồng lên **1.35 lần (Bonus 35%)** nếu hai sản phẩm cùng danh mục, giúp kết quả gợi ý sát với nhu cầu thực tế hơn.
+
+2. **Item-Based Collaborative Filtering (CF - Lọc cộng tác theo vật phẩm)**:
+   - Thay vì so sánh người dùng với nhau (User-Based), hệ thống xây dựng **Ma trận Item-User** từ lịch sử hành vi của toàn bộ hệ thống.
+   - Bằng cách phân tích độ lớn vector người dùng tương tác (Item Magnitudes) và tích vô hướng (Dot Product) của các sản phẩm, mô hình sẽ tính được độ tương đồng chéo giữa các vật phẩm thông qua hành vi của đám đông (Ví dụ: "Khách hàng mua điện thoại A cũng thường mua ốp lưng B").
+
+3. **Thuật toán Gợi ý Lai (Weighted Hybrid Scoring)**:
+   - Để khắc phục triệt để nhược điểm "Cold Start" (Thiếu dữ liệu của người dùng mới), điểm số cá nhân hóa cuối cùng là phép lai (Hybrid) có trọng số: **50% điểm CBF + 50% điểm CF**.
+
+#### B. Cơ chế Theo dõi Hành vi (Implicit Feedback Tracking)
+Mọi thao tác của người dùng trên nền tảng đều được thu thập dưới dạng phản hồi ẩn (Implicit Feedback) và lưu vào cơ sở dữ liệu `user_behavior_logs` với các trọng số (Weights) được tinh chỉnh:
+- **Mua hàng (Purchase)**: 5 điểm (Tương tác mạnh nhất, thể hiện nhu cầu chắc chắn).
+- **Thêm vào giỏ / Tiến hành thanh toán (Cart/Checkout)**: 4 điểm (Tương tác mua sắm cao).
+- **Yêu thích (Like/Wishlist)**: 3 điểm (Sự quan tâm rõ rệt).
+- **Tìm kiếm & Click (Search_Click)**: 2 điểm (Tương tác có chủ đích).
+- **Xem sản phẩm (View/Dwell_time)**: 1 điểm (Tương tác khám phá).
+
+Hệ thống sẽ tổng hợp Vector Sở thích (User Profile Vector) từ các trọng số này để so khớp (Cosine Similarity) với tập sản phẩm chưa tương tác. Các sản phẩm đã Mua (trọng số >= 5) sẽ được lọc khỏi danh sách đề xuất để tránh spam gợi ý lại.
+
+#### C. Kịch bản Đề xuất Linh hoạt (Recommendation Scenarios)
+1. **Sản phẩm Tương tự (Similar Products)**: Hiển thị ngay dưới chân trang Chi tiết Sản phẩm dựa thuần túy vào thuật toán TF-IDF (CBF).
+2. **Gợi ý Cá nhân hóa (Personalized Recommendations)**: Hiển thị ở Trang chủ, tính toán theo thời gian thực (Real-time) từ thuật toán Hybrid, thay đổi ngay lập tức sau mỗi lượt click của người dùng.
+3. **Gợi ý theo Ngữ cảnh (Contextual / Search-based)**: Tự động trích xuất các từ khóa (Keywords) trong 5 lượt tìm kiếm gần nhất để gợi ý sản phẩm khớp từ khóa.
+4. **Fallback Cơ chế Thịnh hành (Trending Products)**: Khi người dùng hoàn toàn mới (Incognito / No-history), hệ thống mặc định rẽ nhánh về việc đề xuất các Sản phẩm Nổi bật có điểm Popularity Score cao nhất.
 
 ---
 
