@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist: Hệ thống gợi ý nội dung theo hành vi</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 8px;
+            background-color: #f9fafb;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .task-item:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .checkbox-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-right: 1rem;
+            margin-top: 0.2rem;
+        }
+
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: var(--success);
+            border-color: var(--success);
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin: 0 0 0.25rem 0;
+            color: var(--text-main);
+            transition: color 0.2s;
+        }
+
+        .task-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        input[type="checkbox"]:checked ~ .task-content .task-title {
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .progress-container {
+            margin-bottom: 2rem;
+            background-color: var(--border);
+            border-radius: 999px;
+            height: 12px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            text-align: right;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Tiến độ Đồ án môn học</h1>
+        <p class="subtitle">Đề tài: Xây dựng hệ thống gợi ý nội dung dựa trên hành vi người dùng (Môn Hệ thống thông minh)</p>
+
+        <div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-text">Hoàn thành: <span id="progress-text">0</span>%</div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">1. Phân tích & Thu thập dữ liệu (Data Collection & Analysis)</h2>
+            <ul class="task-list">
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Xác định bài toán & Yêu cầu hệ thống</h3>
+                        <p class="task-desc">Nghiên cứu đối tượng người dùng, xác định các loại hành vi cần theo dõi (click, view time, like, share, mua hàng, v.v.).</p>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Tìm kiếm hoặc xây dựng Dataset</h3>
+                        <p class="task-desc">Sử dụng dataset có sẵn (MovieLens, Amazon Reviews...) hoặc thiết lập tracking để thu thập dữ liệu tự sinh giả lập.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">2. Tiền xử lý dữ liệu (Data Preprocessing)</h2>
+            <ul class="task-list">
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Làm sạch dữ liệu (Data Cleaning)</h3>
+                        <p class="task-desc">Loại bỏ noise, xử lý missing values, loại bỏ dữ liệu ngoại lai (outliers).</p>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Trích xuất đặc trưng (Feature Engineering)</h3>
+                        <p class="task-desc">Chuyển đổi logs hành vi thành ma trận Item-User hoặc vector đặc trưng của Item/User.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">3. Xây dựng mô hình Gợi ý (Model Building)</h2>
+            <ul class="task-list">
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Thuật toán Collaborative Filtering (Lọc cộng tác)</h3>
+                        <p class="task-desc">Cài đặt User-based hoặc Item-based Collaborative Filtering.</p>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Thuật toán Content-Based (Dựa trên nội dung)</h3>
+                        <p class="task-desc">Gợi ý dựa trên sự tương đồng giữa các nội dung (TF-IDF, Cosine Similarity).</p>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Mô hình lai (Hybrid Recommender System) - Tùy chọn nâng cao</h3>
+                        <p class="task-desc">Kết hợp cả Collaborative Filtering và Content-Based hoặc sử dụng Deep Learning (Matrix Factorization, Neural CF).</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">4. Đánh giá & Tối ưu Mô hình (Evaluation & Optimization)</h2>
+            <ul class="task-list">
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Huấn luyện mô hình (Training)</h3>
+                        <p class="task-desc">Chia tập dữ liệu Train/Test và tiến hành training mô hình.</p>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Đo lường độ chính xác (Metrics)</h3>
+                        <p class="task-desc">Đánh giá bằng các độ đo: RMSE, MAE, Precision@K, Recall@K, F1-Score.</p>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Tối ưu hóa siêu tham số (Hyperparameter Tuning)</h3>
+                        <p class="task-desc">Tinh chỉnh mô hình để đạt kết quả tốt nhất trên tập Validation.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">5. Xây dựng ứng dụng & Tích hợp (App Development)</h2>
+            <ul class="task-list">
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Xây dựng API Gợi ý (Backend)</h3>
+                        <p class="task-desc">Phát triển API bằng Flask, FastAPI, hoặc Node.js để nhận UserID và trả về danh sách Items gợi ý.</p>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Giao diện người dùng (Frontend)</h3>
+                        <p class="task-desc">Xây dựng UI hiển thị nội dung và khu vực "Gợi ý cho bạn", đồng thời bắt các sự kiện hành vi của user gửi về backend.</p>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Tích hợp End-to-End</h3>
+                        <p class="task-desc">Kiểm thử toàn hệ thống: User click -> Thu thập -> Chạy lại mô hình (hoặc Real-time prediction) -> Trả về gợi ý mới.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">6. Báo cáo & Nghiệm thu</h2>
+            <ul class="task-list">
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Viết báo cáo tài liệu Đồ án</h3>
+                        <p class="task-desc">Trình bày cơ sở lý thuyết, kiến trúc hệ thống, kết quả thực nghiệm và hướng phát triển.</p>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" onchange="updateProgress()">
+                    </div>
+                    <div class="task-content">
+                        <h3 class="task-title">Chuẩn bị Slide & Demo</h3>
+                        <p class="task-desc">Làm slide thuyết trình bảo vệ đồ án và quay video/demo trực tiếp hệ thống chạy thực tế.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section" style="background: #eef2ff; padding: 1.5rem; border-radius: 12px; margin-top: 2rem; border: 1px solid #c7d2fe;">
+            <h2 class="section-title" style="margin-top: 0; color: #4338ca; border-bottom-color: #a5b4fc;">📚 Kiến trúc & Thuật toán đã triển khai (Dùng cho Báo cáo)</h2>
+            
+            <h3 style="color: #1f2937; font-size: 1.1rem; margin-bottom: 0.5rem;">1. Thuật toán Lọc cộng tác (Collaborative Filtering)</h3>
+            <p style="font-size: 0.95rem; margin-top: 0; margin-bottom: 1rem; color: #4b5563;">
+                Hệ thống áp dụng <strong>Item-based Collaborative Filtering</strong>. Ma trận Item-User được xây dựng dựa trên bảng <code>user_behavior_logs</code> (lưu trữ lịch sử click, view, add_cart, purchase với các trọng số weight khác nhau). Sau đó tính độ tương đồng giữa các Item bằng <strong>Cosine Similarity</strong> để tìm ra các sản phẩm mua chéo.
+            </p>
+
+            <h3 style="color: #1f2937; font-size: 1.1rem; margin-bottom: 0.5rem;">2. Thuật toán Lọc theo nội dung (Content-Based Filtering)</h3>
+            <p style="font-size: 0.95rem; margin-top: 0; margin-bottom: 1rem; color: #4b5563;">
+                Sử dụng thuật toán <strong>TF-IDF</strong> để trích xuất đặc trưng từ Tên, Mô tả, Tags và Danh mục sản phẩm. Sau đó tính <strong>Cosine Similarity</strong> kết hợp với <em>Category Synergy Multiplier (x1.35)</em> để ưu tiên các sản phẩm cùng danh mục.
+            </p>
+
+            <h3 style="color: #1f2937; font-size: 1.1rem; margin-bottom: 0.5rem;">3. Mô hình Lai (Hybrid Recommender System)</h3>
+            <p style="font-size: 0.95rem; margin-top: 0; margin-bottom: 1rem; color: #4b5563;">
+                API Gợi ý cá nhân hóa áp dụng phương pháp <strong>Weighted Hybrid</strong>: Kết hợp 50% điểm số chuẩn hóa từ Content-Based và 50% điểm số chuẩn hóa từ Collaborative Filtering. Nếu dữ liệu tương tác chưa đủ để chạy CF, hệ thống có cơ chế <em>Fallback</em> tự động điền đầy bằng kết quả CBF (Giải quyết bài toán Cold Start).
+            </p>
+
+            <h3 style="color: #1f2937; font-size: 1.1rem; margin-bottom: 0.5rem;">4. Đánh giá Mô hình (Offline Evaluation)</h3>
+            <p style="font-size: 0.95rem; margin-top: 0; margin-bottom: 1rem; color: #4b5563;">
+                Có Script Python độc lập (<code>ai_evaluation/evaluate_model.py</code>) kết nối trực tiếp với MySQL để đánh giá hiệu suất mô hình thông qua các độ đo: <strong>Precision@K</strong>, <strong>Recall@K</strong>, và <strong>F1-Score</strong> dựa trên việc chia tập Train/Test theo tỷ lệ 80/20.
+            </p>
+
+            <h3 style="color: #1f2937; font-size: 1.1rem; margin-bottom: 0.5rem;">5. Thiết kế CSDL (ERD) & Luồng Dữ Liệu</h3>
+            <p style="font-size: 0.95rem; margin-top: 0; margin-bottom: 0.5rem; color: #4b5563;">
+                Hệ thống sử dụng cơ sở dữ liệu quan hệ (MySQL) với các bảng (Entities) cốt lõi được thiết kế chuyên biệt cho hệ thống gợi ý:
+            </p>
+            <ul style="font-size: 0.95rem; color: #4b5563; margin-top: 0; margin-bottom: 1rem; padding-left: 1.5rem;">
+                <li><strong><code>user_behavior_logs</code>:</strong> Bảng quan trọng nhất lưu trữ mọi Implicit Feedback (tương tác ngầm). Chứa <code>user_id</code>, <code>product_id</code>, <code>action_type</code> (view, cart, purchase...) và <code>weight</code> (trọng số của hành vi). Bảng này là nguyên liệu chính đầu vào cho thuật toán <em>Collaborative Filtering</em>.</li>
+                <li><strong><code>products</code> & <code>categories</code>:</strong> Lưu trữ thông tin metadata (Tên, mô tả, danh mục). Dữ liệu text này được dùng cho thuật toán <em>Content-Based (TF-IDF)</em>.</li>
+                <li><strong><code>product_tags</code> & <code>tags</code>:</strong> Hệ thống dán nhãn (tags) đa chiều cho sản phẩm để tăng cường độ chính xác khi tính Cosine Similarity trong mô hình Content-Based.</li>
+                <li><strong><code>search_logs</code>:</strong> Lưu trữ truy vấn tìm kiếm, phục vụ việc cá nhân hóa hoặc gợi ý theo ngữ cảnh tìm kiếm (Context-Aware Recommendation).</li>
+            </ul>
+            <p style="font-size: 0.95rem; margin-top: 0; margin-bottom: 0; color: #4b5563;">
+                <strong>Cách thuật toán dùng các bảng:</strong> Khi User A vào trang chủ, hệ thống query bảng <code>user_behavior_logs</code> để lấy danh sách tương tác gần nhất của A. Sau đó, truyền vào hàm <em>Hybrid Recommender</em>. Hàm này một mặt phân tích Content-based từ bảng <code>products</code>, mặt khác dựng ma trận Collaborative Filtering từ tất cả user trong <code>user_behavior_logs</code> để tìm ra các sản phẩm tiềm năng, cuối cùng tổng hợp điểm (score) và trả về Frontend.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const total = checkboxes.length;
+            const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            
+            const percentage = Math.round((checked / total) * 100);
+            
+            document.getElementById('progress-bar').style.width = percentage + '%';
+            document.getElementById('progress-text').innerText = percentage;
+
+            // Lưu trạng thái vào localStorage để không bị mất khi reload
+            const state = [];
+            checkboxes.forEach((cb, index) => {
+                state[index] = cb.checked;
+            });
+            localStorage.setItem('recommendation_checklist', JSON.stringify(state));
+        }
+
+        // Load trạng thái khi khởi tạo
+        window.onload = function() {
+            const saved = localStorage.getItem('recommendation_checklist');
+            if(saved) {
+                const state = JSON.parse(saved);
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach((cb, index) => {
+                    cb.checked = state[index] === true;
+                });
+            }
+            updateProgress();
+        }
+    </script>
+</body>
+</html>

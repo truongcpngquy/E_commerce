@@ -1,0 +1,236 @@
+.stores-list-page {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+/* HERO BANNER */
+.stores-hero-banner {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff7337 50%, #d9381e 100%);
+  padding: 40px 36px;
+  border-radius: 24px;
+  color: #ffffff;
+  margin-bottom: 32px;
+  box-shadow: 0 12px 32px rgba(238, 77, 45, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.stores-hero-banner::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hero-title {
+  margin: 0 0 10px 0;
+  font-size: 26px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.hero-sub {
+  margin: 0 0 24px 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 700px;
+  line-height: 1.5;
+}
+
+/* SEARCH & FILTERS BAR */
+.stores-search-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.search-input-box {
+  position: relative;
+  max-width: 600px;
+}
+
+.search-input-box .search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 16px;
+}
+
+.search-input-box input {
+  width: 100%;
+  padding: 12px 16px 12px 46px;
+  border-radius: 16px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  outline: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.search-input-box input:focus {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.stores-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-pill-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.filter-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.filter-pill-btn.active {
+  background: #ffffff;
+  color: #ee4d2d;
+  border-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* STORE DISCOVERY CARD */
+.store-discovery-card {
+  background: #ffffff;
+  border-radius: 22px;
+  border: 1px solid #f1f5f9;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.store-discovery-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  border-color: #fee2e2;
+}
+
+.card-banner-bg {
+  height: 110px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.card-mall-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 3px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card-body {
+  padding: 16px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  .card-avatar {
+    margin-top: -34px;
+    background: #ffffff;
+  }
+}
+
+.card-store-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+
+.card-description {
+  margin: 10px 0;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-specs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-top: auto;
+  margin-bottom: 14px;
+  font-size: 11px;
+}
+
+.spec-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.spec-label {
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.spec-val {
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.card-footer-action {
+  margin-top: 4px;
+}
