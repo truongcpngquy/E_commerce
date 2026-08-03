@@ -64,23 +64,25 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // Lấy danh sách sản phẩm (có hỗ trợ Lazy Loading phân trang)
+  // Lấy danh sách sản phẩm (có hỗ trợ Lazy Loading & Phân trang số Pagination Navigation)
   const fetchProducts = async (filters = {}) => {
-    const { category, search, limit = 20, offset = 0, paginated = false } = filters;
-    let url = `${API_BASE_URL}/products?limit=${limit}&offset=${offset}`;
+    const { category, search, limit = 8, page, offset, paginated = false } = filters;
+    const computedOffset = offset !== undefined ? offset : (page ? (page - 1) * limit : 0);
+    let url = `${API_BASE_URL}/products?limit=${limit}&offset=${computedOffset}`;
+    if (page) url += `&page=${page}`;
     if (category) url += `&category=${category}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
-    if (paginated) url += `&paginated=true`;
+    if (paginated || page) url += `&paginated=true`;
 
     try {
       const res = await fetch(url);
       if (res.ok) {
         return await res.json();
       }
-      return paginated ? { products: [], total: 0, hasMore: false } : [];
+      return (paginated || page) ? { products: [], total: 0, page: 1, totalPages: 1, hasMore: false } : [];
     } catch (err) {
       console.error('Error fetching products:', err);
-      return paginated ? { products: [], total: 0, hasMore: false } : [];
+      return (paginated || page) ? { products: [], total: 0, page: 1, totalPages: 1, hasMore: false } : [];
     }
   };
 

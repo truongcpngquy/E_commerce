@@ -14,12 +14,12 @@ export default function Home() {
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
 
-  // Trạng thái Phân Trang Lazy Loading
+  // Trạng thái Lazy Loading Trang Chủ (Tải sản phẩm theo đợt từ Database)
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [totalProducts, setTotalProducts] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const PAGE_LIMIT = 8; // Đợt tải 8 sản phẩm cho Lazy Loading
+  const PAGE_LIMIT = 8; // Tải 8 sản phẩm mỗi đợt
 
   // Tải danh sách gian hàng nổi bật Shopee Mall
   useEffect(() => {
@@ -50,6 +50,7 @@ export default function Home() {
         setHasMore(res.hasMore || false);
       } else {
         setAllProducts(Array.isArray(res) ? res : []);
+        setTotalProducts(0);
         setHasMore(false);
       }
       setIsLoadingProducts(false);
@@ -58,7 +59,7 @@ export default function Home() {
     loadProducts();
   }, [selectedCategory, searchQuery]);
 
-  // Tải bổ sung sản phẩm đợt tiếp theo (Lazy Load More)
+  // Tải bổ sung sản phẩm đợt tiếp theo (Nút "Xem Thêm Sản Phẩm Khác")
   const handleLoadMore = async () => {
     if (isLoadingMore || !hasMore) return;
 
@@ -288,7 +289,7 @@ export default function Home() {
             ))}
           </div>
 
-          {/* KỸ THUẬT LAZY LOADING - TẢI THÊM SẢN PHẨM TRÊN TRANG CHỦ */}
+          {/* KỸ THUẬT LAZY LOADING - NÚT TẢI THÊM SẢN PHẨM TRÊN TRANG CHỦ */}
           {hasMore && (
             <div className="lazy-load-action-bar">
               <button 

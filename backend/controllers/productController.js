@@ -44,14 +44,18 @@ exports.getAllProducts = async (req, res) => {
     const [[countRow]] = await db.query(countQuery, countParams);
 
     const total = countRow ? countRow.total : 0;
+    const page = req.query.page ? Math.max(1, Number(req.query.page)) : Math.floor(numOffset / numLimit) + 1;
+    const totalPages = Math.ceil(total / numLimit) || 1;
     const hasMore = numOffset + products.length < total;
 
-    if (paginated === 'true' || paginated === true) {
+    if (paginated === 'true' || paginated === true || req.query.page) {
       return res.json({
         products,
         total,
+        page,
         limit: numLimit,
         offset: numOffset,
+        totalPages,
         hasMore
       });
     }
