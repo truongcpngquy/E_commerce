@@ -133,6 +133,37 @@ export default function Auth() {
           <button type="submit" className="auth-submit-btn" disabled={isLoading}>
             {isLoading ? 'Đang xử lý...' : isLogin ? 'Đăng nhập' : 'Đăng ký'}
           </button>
+
+          {isLogin && (
+            <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid #eee', textAlign: 'center' }}>
+              <span style={{ fontSize: '12px', fontWeight: '600', color: '#666', display: 'block', marginBottom: '10px' }}>
+                🔑 Nhấp để điền nhanh tài khoản mẫu thử nghiệm:
+              </span>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => { setUsername('customer1'); setPassword('123456'); }}
+                  style={{ padding: '6px 12px', fontSize: '11px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: '12px', cursor: 'pointer', fontWeight: '600' }}
+                >
+                  🛒 Khách hàng (customer1)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setUsername('seller1'); setPassword('123456'); }}
+                  style={{ padding: '6px 12px', fontSize: '11px', background: '#fff0ee', border: '1px solid #ffbbad', color: '#ee4d2d', borderRadius: '12px', cursor: 'pointer', fontWeight: '700' }}
+                >
+                  🏪 Người bán (seller1)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setUsername('admin'); setPassword('123456'); }}
+                  style={{ padding: '6px 12px', fontSize: '11px', background: '#eef2ff', border: '1px solid #c7d2fe', color: '#4f46e5', borderRadius: '12px', cursor: 'pointer', fontWeight: '600' }}
+                >
+                  🛡️ Admin (admin)
+                </button>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>

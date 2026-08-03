@@ -27,7 +27,7 @@ e_commerce/
 │   ├── seed.js               # Script tạo dữ liệu mẫu phong phú
 │   ├── server.js             # File khởi chạy server chính
 │   └── package.json
-└── frontend/
+|__ frontend/
     ├── src/
     │   ├── components/       # Component dùng chung (Header/Navbar)
     │   ├── context/          # Quản lý state toàn cục (AppContext)

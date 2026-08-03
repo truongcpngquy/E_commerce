@@ -72,6 +72,7 @@ export default function Orders() {
                 <div className="order-card-header">
                   <div className="order-meta-info">
                     <span className="order-id">Mã đơn hàng: <strong>#{order.id}</strong></span>
+                    <span className="order-store-name-tag">🏪 <strong>{order.store_name || 'Gian hàng Shopee'}</strong></span>
                     <span className="order-date">
                       Ngày đặt: {new Date(order.created_at).toLocaleDateString('vi-VN')} {new Date(order.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                     </span>

@@ -67,9 +67,54 @@ exports.getCategories = async (req, res) => {
   }
 };
 
+// Gợi ý tìm kiếm tự động (Auto-complete Live Suggestions)
+exports.searchSuggest = async (req, res) => {
+  const q = req.query.q || '';
+  if (!q.trim()) {
+    return res.json({ suggestions: [], products: [] });
+  }
+
+  const cleanQuery = q.trim();
+  const searchStart = `${cleanQuery}%`;
+  const searchContains = `%${cleanQuery}%`;
+
+  try {
+    const [products] = await db.query(
+      `SELECT p.id, p.name, p.price, p.image_url, c.name as category_name
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       WHERE (p.name LIKE ? OR p.tags LIKE ? OR c.name LIKE ?)
+       ORDER BY 
+         CASE 
+           WHEN p.name LIKE ? THEN 1
+           WHEN p.name LIKE ? THEN 2
+           WHEN c.name LIKE ? THEN 3
+           ELSE 4
+         END ASC, p.id DESC
+       LIMIT 5`,
+      [searchContains, searchContains, searchContains, searchStart, searchContains, searchContains]
+    );
+
+    const [catRows] = await db.query(
+      `SELECT name FROM categories WHERE name LIKE ? LIMIT 3`,
+      [searchContains]
+    );
+
+    const suggestions = catRows.map(c => c.name);
+
+    res.json({
+      query: cleanQuery,
+      suggestions,
+      products
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi khi lấy gợi ý tìm kiếm!', error: err.message });
+  }
+};
+
 // Thêm mới sản phẩm (Dành cho Seller)
 exports.createProduct = async (req, res) => {
-  const { name, description, price, stock, image_url, category_id, tags } = req.body;
+  const { name, description, price, original_price, stock, image_url, category_id, tags, store_id } = req.body;
 
   if (!name || !price || !category_id) {
     return res.status(400).json({ message: 'Vui lòng nhập tên, giá và danh mục sản phẩm!' });
@@ -77,9 +122,9 @@ exports.createProduct = async (req, res) => {
 
   try {
     const [result] = await db.query(
-      `INSERT INTO products (name, description, price, stock, image_url, category_id, tags) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [name, description, price, stock || 0, image_url, category_id, tags]
+      `INSERT INTO products (store_id, name, description, price, original_price, stock, image_url, category_id, tags) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [store_id || 1, name, description, price, original_price || price, stock || 0, image_url, category_id, tags]
     );
 
     res.status(201).json({
@@ -88,5 +133,40 @@ exports.createProduct = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ message: 'Lỗi server!', error: err.message });
+  }
+};
+
+// Cập nhật sản phẩm (Dành cho Seller)
+exports.updateProduct = async (req, res) => {
+  const { id } = req.params;
+  const { name, description, price, original_price, stock, image_url, category_id, tags, status, store_id } = req.body;
+
+  if (!name || !price || !category_id) {
+    return res.status(400).json({ message: 'Vui lòng nhập đầy đủ tên, giá và danh mục sản phẩm!' });
+  }
+
+  try {
+    await db.query(
+      `UPDATE products 
+       SET name = ?, description = ?, price = ?, original_price = ?, stock = ?, image_url = ?, category_id = ?, tags = ?, status = COALESCE(?, status), store_id = COALESCE(?, store_id)
+       WHERE id = ?`,
+      [name, description, price, original_price || price, stock || 0, image_url, category_id, tags, status, store_id, id]
+    );
+
+    res.json({ message: 'Cập nhật sản phẩm thành công!', id });
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi server khi cập nhật sản phẩm!', error: err.message });
+  }
+};
+
+// Xóa/lưu trữ sản phẩm
+exports.deleteProduct = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await db.query('UPDATE products SET status = "archived" WHERE id = ?', [id]);
+    res.json({ message: 'Đã ngừng bán sản phẩm thành công!', id });
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi server khi xóa sản phẩm!', error: err.message });
   }
 };
