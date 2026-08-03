@@ -1,33 +1,61 @@
 const db = require('../config/db');
 
-// Lấy danh sách sản phẩm (có hỗ trợ lọc theo danh mục, tìm kiếm và phân trang)
+// Lấy danh sách sản phẩm (có hỗ trợ lọc theo danh mục, tìm kiếm và phân trang Lazy Loading)
 exports.getAllProducts = async (req, res) => {
-  const { category, search, limit = 20, offset = 0 } = req.query;
+  const { category, search, limit = 20, offset = 0, paginated = false } = req.query;
 
   try {
     let query = `
-      SELECT p.*, c.name as category_name 
+      SELECT p.*, c.name as category_name, COALESCE(s.name, 'SmartTech Official Store') as store_name
       FROM products p 
       LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN stores s ON p.store_id = s.id
       WHERE 1=1
     `;
     const params = [];
 
-    if (category) {
+    if (category && category !== 'all') {
       query += ' AND p.category_id = ?';
       params.push(category);
     }
 
-    if (search) {
+    if (search && search.trim()) {
       query += ' AND (p.name LIKE ? OR p.description LIKE ? OR p.tags LIKE ?)';
-      const searchParam = `%${search}%`;
+      const searchParam = `%${search.trim()}%`;
       params.push(searchParam, searchParam, searchParam);
     }
 
+    // Đếm tổng số lượng sản phẩm để tính hasMore
+    const countQuery = `
+      SELECT COUNT(*) as total FROM products p 
+      WHERE 1=1
+      ${category && category !== 'all' ? 'AND p.category_id = ?' : ''}
+      ${search && search.trim() ? 'AND (p.name LIKE ? OR p.description LIKE ? OR p.tags LIKE ?)' : ''}
+    `;
+    const countParams = [...params];
+
+    const numLimit = Number(limit);
+    const numOffset = Number(offset);
+
     query += ' ORDER BY p.id DESC LIMIT ? OFFSET ?';
-    params.push(Number(limit), Number(offset));
+    params.push(numLimit, numOffset);
 
     const [products] = await db.query(query, params);
+    const [[countRow]] = await db.query(countQuery, countParams);
+
+    const total = countRow ? countRow.total : 0;
+    const hasMore = numOffset + products.length < total;
+
+    if (paginated === 'true' || paginated === true) {
+      return res.json({
+        products,
+        total,
+        limit: numLimit,
+        offset: numOffset,
+        hasMore
+      });
+    }
+
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: 'Lỗi server!', error: err.message });

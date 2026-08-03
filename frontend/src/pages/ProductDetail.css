@@ -237,6 +237,69 @@
   color: var(--text-gray);
 }
 
+/* THẺ GIAN HÀNG (STORE CARD) */
+.product-store-card-container {
+  background: var(--white);
+  padding: 20px 30px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.store-card-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.store-card-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fff5f2;
+  border: 2px solid var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+}
+
+.store-card-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0 0 4px 0;
+}
+
+.store-card-status {
+  font-size: 13px;
+  color: var(--text-gray);
+}
+
+.btn-visit-store {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.btn-visit-store:hover {
+  background: var(--primary-color);
+  color: #ffffff;
+}
+
 /* Mô tả sản phẩm */
 .product-description-container {
   background: var(--white);

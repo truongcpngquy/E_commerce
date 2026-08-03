@@ -64,22 +64,23 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // Lấy danh sách sản phẩm
+  // Lấy danh sách sản phẩm (có hỗ trợ Lazy Loading phân trang)
   const fetchProducts = async (filters = {}) => {
-    const { category, search, limit = 20, offset = 0 } = filters;
+    const { category, search, limit = 20, offset = 0, paginated = false } = filters;
     let url = `${API_BASE_URL}/products?limit=${limit}&offset=${offset}`;
     if (category) url += `&category=${category}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (paginated) url += `&paginated=true`;
 
     try {
       const res = await fetch(url);
       if (res.ok) {
         return await res.json();
       }
-      return [];
+      return paginated ? { products: [], total: 0, hasMore: false } : [];
     } catch (err) {
       console.error('Error fetching products:', err);
-      return [];
+      return paginated ? { products: [], total: 0, hasMore: false } : [];
     }
   };
 
@@ -289,6 +290,51 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Store Public APIs
+  const fetchStores = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/stores`);
+      if (res.ok) {
+        return await res.json();
+      }
+      return [];
+    } catch (err) {
+      console.error('Error fetching stores:', err);
+      return [];
+    }
+  };
+
+  const fetchStoreById = async (id) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/stores/${id}`);
+      if (res.ok) {
+        return await res.json();
+      }
+      return null;
+    } catch (err) {
+      console.error('Error fetching store info:', err);
+      return null;
+    }
+  };
+
+  const fetchStoreProducts = async (storeId, params = {}) => {
+    const { category, q, sort = 'newest', limit = 8, offset = 0 } = params;
+    let url = `${API_BASE_URL}/stores/${storeId}/products?limit=${limit}&offset=${offset}&sort=${sort}`;
+    if (category) url += `&category=${category}`;
+    if (q) url += `&q=${encodeURIComponent(q)}`;
+
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        return await res.json();
+      }
+      return { products: [], total: 0, hasMore: false };
+    } catch (err) {
+      console.error('Error fetching store products:', err);
+      return { products: [], total: 0, hasMore: false };
+    }
+  };
+
   // Đăng nhập
   const login = async (username, password) => {
     try {
@@ -370,6 +416,9 @@ export const AppProvider = ({ children }) => {
         trackInteraction,
         getPersonalizedRecommendations,
         getSimilarProducts,
+        fetchStores,
+        fetchStoreById,
+        fetchStoreProducts,
         login,
         signup,
         logout,

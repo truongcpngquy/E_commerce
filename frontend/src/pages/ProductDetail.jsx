@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { ShoppingCart, Heart, ShieldCheck, RefreshCw, Truck } from 'lucide-react';
+import { ShoppingCart, Heart, ShieldCheck, RefreshCw, Truck, Store, ExternalLink } from 'lucide-react';
 import './ProductDetail.css';
 
 export default function ProductDetail() {
@@ -163,6 +163,24 @@ export default function ProductDetail() {
               <RefreshCw size={16} /> 7 ngày miễn phí trả hàng
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* KHỐI THÔNG TIN GIAN HÀNG (STORE CARD) */}
+      <div className="product-store-card-container">
+        <div className="store-card-left">
+          <div className="store-card-avatar">
+            <Store size={28} className="store-icon" />
+          </div>
+          <div className="store-card-meta">
+            <h3 className="store-card-name">{product.store_name || 'SmartTech Official Store'}</h3>
+            <span className="store-card-status">Online 5 phút trước • Tỷ lệ phản hồi 99%</span>
+          </div>
+        </div>
+        <div className="store-card-right">
+          <Link to={`/stores/${product.store_id || 1}`} className="btn-visit-store">
+            <ExternalLink size={16} /> Xem Shop
+          </Link>
         </div>
       </div>
 

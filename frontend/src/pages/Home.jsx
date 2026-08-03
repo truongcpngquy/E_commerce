@@ -1,32 +1,87 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Link } from 'react-router-dom';
-import { Sparkles, Grid, ArrowRight } from 'lucide-react';
+import { Sparkles, Grid, ArrowRight, Store, ShieldCheck, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
 import './Home.css';
 
 export default function Home() {
-  const { categories, fetchProducts, getPersonalizedRecommendations, user, searchQuery } = useApp();
+  const { categories, fetchProducts, getPersonalizedRecommendations, fetchStores, user, searchQuery } = useApp();
   
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [allProducts, setAllProducts] = useState([]);
   const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [featuredStores, setFeaturedStores] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
 
-  // Lấy danh sách sản phẩm thông thường
+  // Trạng thái Phân Trang Lazy Loading
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const PAGE_LIMIT = 8; // Đợt tải 8 sản phẩm cho Lazy Loading
+
+  // Tải danh sách gian hàng nổi bật Shopee Mall
+  useEffect(() => {
+    const loadStores = async () => {
+      const storesData = await fetchStores();
+      setFeaturedStores(storesData || []);
+    };
+    loadStores();
+  }, []);
+
+  // Lấy danh sách sản phẩm đợt đầu tiên khi đổi danh mục/tìm kiếm
   useEffect(() => {
     const loadProducts = async () => {
       setIsLoadingProducts(true);
-      const data = await fetchProducts({
+      setOffset(0);
+
+      const res = await fetchProducts({
         category: selectedCategory,
-        search: searchQuery
+        search: searchQuery,
+        limit: PAGE_LIMIT,
+        offset: 0,
+        paginated: true
       });
-      setAllProducts(data);
+
+      if (res && res.products) {
+        setAllProducts(res.products);
+        setTotalProducts(res.total || 0);
+        setHasMore(res.hasMore || false);
+      } else {
+        setAllProducts(Array.isArray(res) ? res : []);
+        setHasMore(false);
+      }
       setIsLoadingProducts(false);
     };
 
     loadProducts();
   }, [selectedCategory, searchQuery]);
+
+  // Tải bổ sung sản phẩm đợt tiếp theo (Lazy Load More)
+  const handleLoadMore = async () => {
+    if (isLoadingMore || !hasMore) return;
+
+    setIsLoadingMore(true);
+    const nextOffset = offset + PAGE_LIMIT;
+
+    const res = await fetchProducts({
+      category: selectedCategory,
+      search: searchQuery,
+      limit: PAGE_LIMIT,
+      offset: nextOffset,
+      paginated: true
+    });
+
+    if (res && res.products && res.products.length > 0) {
+      setAllProducts((prev) => [...prev, ...res.products]);
+      setOffset(nextOffset);
+      setHasMore(res.hasMore || false);
+    } else {
+      setHasMore(false);
+    }
+    setIsLoadingMore(false);
+  };
 
   // Lấy danh sách sản phẩm gợi ý (Content-Based)
   useEffect(() => {
@@ -98,6 +153,49 @@ export default function Home() {
         </div>
       </section>
 
+      {/* SECTION: GIAN HÀNG SHOPEE MALL NỔI BẬT */}
+      {featuredStores.length > 0 && (
+        <section className="featured-stores-section">
+          <div className="section-header-row">
+            <h2 className="section-title">
+              <Store size={20} className="icon-orange" />
+              Gian Hàng Shopee Mall Nổi Bật
+            </h2>
+            <span className="mall-guarantee-badge">
+              <ShieldCheck size={14} /> 100% Chính Hãng
+            </span>
+          </div>
+
+          <div className="stores-grid-home">
+            {featuredStores.map((s) => (
+              <Link to={`/stores/${s.id}`} key={s.id} className="home-store-card">
+                <div className="home-store-cover" style={{ backgroundImage: `url(${s.banner_url || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600'})` }}>
+                  {s.is_official === 1 && (
+                    <span className="home-mall-tag">Mall</span>
+                  )}
+                </div>
+
+                <div className="home-store-body">
+                  <img 
+                    src={s.logo_url || 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=100'} 
+                    alt={s.name} 
+                    className="home-store-logo" 
+                    loading="lazy"
+                  />
+                  <div className="home-store-info">
+                    <h4 className="home-store-name">{s.name}</h4>
+                    <span className="home-store-prods">{s.product_count || 0} sản phẩm • ⭐ 4.9</span>
+                  </div>
+                  <button className="btn-visit-store-sm">
+                    Ghé Shop <ChevronRight size={14} />
+                  </button>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* SECTION 1: GỢI Ý CÁ NHÂN HÓA (Chỉ khi User đăng nhập hoặc hiển thị gợi ý tổng quan) */}
       {user && recommendedProducts.length > 0 && (
         <section className="recommendations-section">
@@ -155,27 +253,64 @@ export default function Home() {
             <p>Không tìm thấy sản phẩm nào phù hợp!</p>
           </div>
         ) : (
-          <div className="products-grid">
+          <>
+            <div className="products-grid">
             {allProducts.map((p) => (
-              <Link to={`/product/${p.id}`} key={p.id} className="product-card">
-                <div className="product-img-wrapper">
-                  <img src={p.image_url} alt={p.name} className="product-img" />
-                </div>
-                <div className="product-info">
-                  <h3 className="product-name">{p.name}</h3>
-                  <div className="product-tags">
-                    {p.tags && p.tags.split(',').slice(0, 3).map((tag, idx) => (
-                      <span key={idx} className="tag-pill">{tag.trim()}</span>
-                    ))}
+              <div key={p.id} className="product-card-wrapper">
+                <Link to={`/product/${p.id}`} className="product-card">
+                  <div className="product-img-wrapper">
+                    <img 
+                      src={p.image_url} 
+                      alt={p.name} 
+                      className="product-img" 
+                      loading="lazy" // Kỹ thuật Lazy Loading hình ảnh chuẩn HTML5
+                    />
                   </div>
-                  <div className="product-footer">
-                    <span className="product-price">{formatPrice(p.price)}</span>
-                    <span className="product-sales">Kho: {p.stock}</span>
+                  <div className="product-info">
+                    <h3 className="product-name">{p.name}</h3>
+                    <div className="product-tags">
+                      {p.tags && p.tags.split(',').slice(0, 3).map((tag, idx) => (
+                        <span key={idx} className="tag-pill">{tag.trim()}</span>
+                      ))}
+                    </div>
+                    <div className="product-footer">
+                      <span className="product-price">{formatPrice(p.price)}</span>
+                      <span className="product-sales">Kho: {p.stock}</span>
+                    </div>
                   </div>
+                </Link>
+                <div className="card-store-link-row">
+                  <Link to={`/stores/${p.store_id || 1}`} className="home-store-pill">
+                    🏬 {p.store_name || 'SmartTech Official Store'}
+                  </Link>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
+
+          {/* KỸ THUẬT LAZY LOADING - TẢI THÊM SẢN PHẨM TRÊN TRANG CHỦ */}
+          {hasMore && (
+            <div className="lazy-load-action-bar">
+              <button 
+                onClick={handleLoadMore} 
+                disabled={isLoadingMore}
+                className="btn-lazy-load-more"
+              >
+                {isLoadingMore ? (
+                  <>
+                    <Loader2 size={18} className="spin-icon" />
+                    Đang tải thêm sản phẩm từ CSDL...
+                  </>
+                ) : (
+                  <>
+                    Xem Thêm Sản Phẩm Khác ({totalProducts - allProducts.length} sản phẩm còn lại)
+                    <ChevronDown size={18} />
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </>
         )}
       </section>
     </div>

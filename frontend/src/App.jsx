@@ -9,6 +9,7 @@ import Orders from './pages/Orders';
 import Auth from './pages/Auth';
 import SellerDashboard from './pages/SellerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import StoreDetail from './pages/StoreDetail';
 import { useApp } from './context/AppContext';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 
@@ -25,6 +26,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/stores/:id" element={<StoreDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/orders" element={<Orders />} />

@@ -81,16 +81,18 @@ graph TD
    - Đảm bảo tính độc lập: Khi Shop A cập nhật trạng thái đơn sang *Đang giao hàng*, Đơn hàng của Shop B không bị ảnh hưởng.
    - Quản lý luồng trạng thái đơn hàng (*Pending $\rightarrow$ Confirmed $\rightarrow$ Shipping $\rightarrow$ Completed / Cancelled*).
 
-3. **Quản Lý Gian Hàng & Thống Kê Tài Chính (Seller Dashboard)**:
+3. **Quản Lý Gian Hàng & Trang Chi Tiết Shop Công Khai (Store Detail Page & Seller Dashboard)**:
+   - Xây dựng Trang Chi Tiết Gian Hàng Công Khai (`StoreDetail.jsx` & `/stores/:id`): Hiển thị thông tin Shop Mall, Banner, Logo, số lượng Người theo dõi, Đánh giá trung bình và Danh sách Sản phẩm thuộc Gian hàng (có phân trang & lọc danh mục).
    - Xây dựng Tab **Tổng Quan & Tài Chính**: 4 thẻ thống kê (Doanh thu, Đơn hàng, Sản phẩm, Đánh giá) và biểu đồ cột doanh thu 6 tháng.
    - Tab **Quản Lý Gian Hàng**: Đa gian hàng (Multi-Store Switcher), cập nhật Logo URL, Banner URL và Live Preview banner trực quan.
 
 ### 📁 Tệp Tin Mã Nguồn Phụ Trách:
 - 📄 `frontend/src/pages/SellerDashboard.jsx` & `SellerDashboard.css` *(Giao diện Kênh Người Bán 4 Tab)*
+- 📄 `frontend/src/pages/StoreDetail.jsx` & `StoreDetail.css` *(Giao diện Trang Gian Hàng Công Khai)*
 - 📄 `frontend/src/api/sellerApi.js` *(API Client Kênh Người Bán)*
 - 📄 `backend/services/sellerService.js` *(Nghiệp vụ tài chính, gian hàng & đơn bán)*
 - 📄 `backend/controllers/sellerController.js` & `productController.js` *(Controller xử lý)*
-- 📄 `backend/routes/sellerRoutes.js` *(Route API Người Bán)*
+- 📄 `backend/routes/sellerRoutes.js` & `storeRoutes.js` *(Route API Gian Hàng)*
 - 📄 `backend/controllers/orderController.js` *(Logic tách đơn hàng đa gian hàng)*
 
 ---
