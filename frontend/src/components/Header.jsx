@@ -213,7 +213,7 @@ export default function Header() {
           {/* User Account */}
           <div className="user-profile-section">
             {user ? (
-              <div 
+              <div
                 className="user-profile-info"
                 onClick={() => setShowDropdown(!showDropdown)}
                 onMouseLeave={() => setShowDropdown(false)}
